@@ -6,7 +6,8 @@ let logger = require("morgan");
 let cors = require("cors");
 const mongoose = require("mongoose");
 
-const MONGO_URI = 27017;
+const MONGO_PORT = 21017;
+const MONGO_URI = `mongodb://localhost:${MONGO_PORT}/mm`;
 const PORT  = 42069;
 
 let indexRouter = require("./routes/index");
