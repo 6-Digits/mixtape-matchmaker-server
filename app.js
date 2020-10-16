@@ -1,20 +1,20 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-var cors = require("cors");
+let createError = require("http-errors");
+let express = require("express");
+let path = require("path");
+let cookieParser = require("cookie-parser");
+let logger = require("morgan");
+let cors = require("cors");
 const mongoose = require("mongoose");
 
 
 const MONGO_URI = 27017;
 const PORT  = 42069;
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var testAPIRouter = require("./routes/testAPI");
+let indexRouter = require("./routes/index");
+let usersRouter = require("./routes/users");
+let testAPIRouter = require("./routes/testAPI");
 
-var app = express();
+let app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
