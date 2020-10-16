@@ -1,20 +1,17 @@
-let createError = require("http-errors");
-let express = require("express");
-let path = require("path");
-let cookieParser = require("cookie-parser");
-let logger = require("morgan");
-let cors = require("cors");
+require('dotenv').config()
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const cors = require("cors");
 const mongoose = require("mongoose");
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const testAPIRouter = require("./routes/testAPI");
 
-const MONGO_PORT = 21017;
-const MONGO_URI = `mongodb://localhost:${MONGO_PORT}/mm`;
-const PORT  = 42069;
-
-let indexRouter = require("./routes/index");
-let usersRouter = require("./routes/users");
-let testAPIRouter = require("./routes/testAPI");
-
-let app = express();
+const MONGO_URI = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@cluster0.vq24q.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority`
+const app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -33,32 +30,31 @@ app.use("/testAPI", testAPIRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    next(createError(404));
+	next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get("env") === "development" ? err : {};
+	// set locals, only providing error in development
+	res.locals.message = err.message;
+	res.locals.error = req.app.get("env") === "development" ? err : {};
 
-    // render the error page
-    res.status(err.status || 500);
-    res.render("error");
+	// render the error page
+	res.status(err.status || 500);
+	res.render("error");
 });
 
 module.exports = app;
 
-mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to the MongoDB database");
-  });
+mongoose.connect(MONGO_URI, {
+	useNewUrlParser: true,
+	useCreateIndex: true,
+	useUnifiedTopology: true,
+}).then(() => {
+	console.log("Connected to the MongoDB database");
+});
 
-  app.listen({ port: PORT }, () => {
-    console.log(`Server running at port: ${PORT}`);
-  });
+app.listen({ port: process.env.SERVER_PORT }, () => {
+	console.log(`Server running at port: ${process.env.SERVER_PORT}`);
+	console.log(`mongodb uri on: ${MONGO_URI}`);
+});
