@@ -6,7 +6,6 @@ var logger = require("morgan");
 var cors = require("cors");
 const mongoose = require("mongoose");
 
-
 const MONGO_URI = 27017;
 const PORT  = 42069;
 
