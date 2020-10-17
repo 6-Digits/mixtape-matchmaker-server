@@ -18,7 +18,6 @@ let accountSchema = new Schema({
     },
     allowNotifications: {
         type: Boolean,
-        required: true,
         default: true
     }
 })
