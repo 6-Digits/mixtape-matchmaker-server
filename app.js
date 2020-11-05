@@ -27,6 +27,13 @@ app.listen(port, () => {
 // create home page route
 app.use("/", require("./routes/index"));
 
+// create authentication routes
+var AuthController = require('./authentication/AuthController');
+app.use('/api/auth', AuthController);
+
+var accountManagement = require('./routes/accountManagement');
+app.use('/api/account', accountManagement);
+
 // initialize passport
 const passport = require('passport');
 app.use(passport.initialize());
