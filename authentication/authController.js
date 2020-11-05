@@ -16,6 +16,7 @@ const bcrypt = require('bcryptjs');
 const config = require('../config'); // get config file
 
 router.post('/login', async (req, res) => {
+    console.log(req.body.email);
     await accounts.findOne({ email: req.body.email }, (err, user) => {
         if (err) {
             return res.status(500).send('Error on the server.');

@@ -4,6 +4,9 @@ require('dotenv').config()
 // create express app
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
+app.use(cors());
 
 app.use(express.static(__dirname));
 app.use(express.json());
@@ -66,7 +69,6 @@ const UserDetails = mongoose.model('userInfo', UserDetail, 'userInfo');
 passport.use(UserDetails.createStrategy());
 passport.serializeUser(UserDetails.serializeUser());
 passport.deserializeUser(UserDetails.deserializeUser());
-
 
 // need views and routes
 
