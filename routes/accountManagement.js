@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const accounts = require('../models/account');
-const VerifyToken = require('../authentication/verifyToken');
+const verifyToken = require('../authentication/verifyToken');
 const bcrypt = require('bcryptjs');
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -21,7 +21,7 @@ router.get('/id/:id', async (req, res) => {
 })
 
 // Updates a single user in the database
-router.post('/id/:id', VerifyToken, async (req, res) => {
+router.post('/id/:id', verifyToken, async (req, res) => {
 	//let hashedPassword = bcrypt.hashSync(req.body.password, 8);
 	await accounts.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
 		if (err) {

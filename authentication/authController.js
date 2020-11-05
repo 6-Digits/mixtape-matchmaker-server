@@ -1,22 +1,19 @@
+require('dotenv').config()
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 
-const VerifyToken = require('./VerifyToken');
+const verifyToken = require('./verifyToken');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 const accounts = require('../models/account');
 
-/**
- * Configure JWT
- */
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
-const config = require('../config'); // get config file
+
 
 router.post('/login', async (req, res) => {
-    console.log(req.body.email);
     await accounts.findOne({ email: req.body.email }, (err, user) => {
         if (err) {
             return res.status(500).send('Error on the server.');
@@ -30,7 +27,7 @@ router.post('/login', async (req, res) => {
 
         // if user is found and password is valid
         // create a token
-        let token = jwt.sign({ id: user._id }, config.secret, {
+        let token = jwt.sign({ id: user._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
 
@@ -55,7 +52,7 @@ router.post('/register', async (req, res) => {
         }
         // if user is registered without errors
         // create a token
-        let token = jwt.sign({ id: user._id }, config.secret, {
+        let token = jwt.sign({ id: user._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
 
@@ -64,7 +61,7 @@ router.post('/register', async (req, res) => {
 
 });
 
-router.get('/me', VerifyToken, async (req, res, next) => {
+router.get('/me', verifyToken, async (req, res, next) => {
     await accounts.findById(req.userId, { password: 0 },
         (err, user) => {
             if (err) {
@@ -76,5 +73,7 @@ router.get('/me', VerifyToken, async (req, res, next) => {
             res.status(200).send(user);
         });
 });
+
+router.get('/reset')
 
 module.exports = router;
