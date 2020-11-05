@@ -7,23 +7,6 @@ const bcrypt = require('bcryptjs');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
-// CREATES A NEW USER
-router.post('/', async (req, res) => {
-	let hashedPassword = bcrypt.hashSync(req.body.password, 8);
-	await accounts.create({
-		email : req.body.email,
-		password : hashedPassword,
-		allowedNotifications : false
-	},
-	function (err, user) {
-		if (err) {
-			return res.status(500).send("There was a problem adding the information to the database.");
-		}else {
-			res.status(200).send(user);
-		}
-	});
-})
-
 // Gets a single user from the database
 router.get('/id/:id', async (req, res) => {
 	await accounts.findById(req.params.id, function (err, user) {
