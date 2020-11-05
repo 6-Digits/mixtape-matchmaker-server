@@ -33,12 +33,12 @@ app.use("/", require("./routes/index"));
 // create authentication routes
 const AuthController = require('./authentication/AuthController');
 app.use('/api/auth', AuthController);
-
 const accountManagement = require('./routes/accountManagement');
 app.use('/api/account', accountManagement);
-
 const profileManagement = require('./routes/profileManagement');
 app.use('/api/profile', profileManagement);
+const matchManagement = require('./routes/matchManagement');
+app.use('/api/match', matchManagement);
 
 // initialize passport
 const passport = require('passport');

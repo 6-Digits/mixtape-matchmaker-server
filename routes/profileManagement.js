@@ -21,16 +21,23 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 })
 
 // Updates a single user-preference in the database
-router.post('/id/:id', VerifyToken, async (req, res) => {
+// For the frontend, note that you would have to make two calls for the settings page
+// First to update the profile, and Second to update the account settings if needed
+router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	let user1;
 	await accounts.findById(req.params.id, function (err, user) {
 		return user, err;
-	}).then(async (result) => {
+	}).then(async (result, error) => {
+		console.log("First query returns")
+		console.log(error)
+		console.log(result)
 		let passwordIsValid = bcrypt.compareSync(req.body.password, result.password);
 		if (passwordIsValid) {
-			await profiles.findByIdAndUpdate(req.params.id, result, function (err, user) {
+			/*Assumes that the old password is embedded into the JSON object*/
+			delete req.body['password']
+			await profiles.findByIdAndUpdate(req.params.id, req.body, function (err, user) {
 				if (err) {
-					return res.status(500).send("There was a problem accessing to the database.");
+					return res.status(500).send("There was a problem accessing to the database.1");
 				} else if (!user) {
 					return res.status(404).send("No user found.");
 				}
@@ -41,6 +48,7 @@ router.post('/id/:id', VerifyToken, async (req, res) => {
 		}
 	}).catch((error)=>{
 		console.log(error);
+		return res.status(500).send("There was a problem with the database.3");
 	})
 })
 
