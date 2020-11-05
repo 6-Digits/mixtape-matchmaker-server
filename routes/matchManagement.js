@@ -3,8 +3,6 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const preferences = require('../models/preference');
 const VerifyToken = require('../authentication/verifyToken');
-const bcrypt = require('bcryptjs');
-const ObjectId = require('mongoose').Types.ObjectId;
 
 router.use(bodyParser.urlencoded({ extended: true }));
 

@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
 
         // check if the password is valid
         let passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
-        //if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
+        if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
 
         // if user is found and password is valid
         // create a token
@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
         });
 
         // return the information including token as JSON
-        res.status(200).send({ auth: true, token: token });
+        res.status(200).send({ auth: true, token: token , id: user._id});
     });
 
 });
