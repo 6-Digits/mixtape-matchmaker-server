@@ -28,11 +28,14 @@ app.listen(port, () => {
 app.use("/", require("./routes/index"));
 
 // create authentication routes
-var AuthController = require('./authentication/AuthController');
+const AuthController = require('./authentication/AuthController');
 app.use('/api/auth', AuthController);
 
-var accountManagement = require('./routes/accountManagement');
+const accountManagement = require('./routes/accountManagement');
 app.use('/api/account', accountManagement);
+
+const profileManagement = require('./routes/profileManagement');
+app.use('/api/profile', profileManagement);
 
 // initialize passport
 const passport = require('passport');

@@ -10,7 +10,7 @@ router.use(bodyParser.urlencoded({ extended: true }));
 // CREATES A NEW USER
 router.post('/', async (req, res) => {
 	let hashedPassword = bcrypt.hashSync(req.body.password, 8);
-	accounts.create({
+	await accounts.create({
 		email : req.body.email,
 		password : hashedPassword,
 		allowedNotifications : false
@@ -25,9 +25,8 @@ router.post('/', async (req, res) => {
 })
 
 // Gets a single user from the database
-router.post('/id/:id', async (req, res) => {
-	let hashedPassword = bcrypt.hashSync(req.body.password, 8);
-	accounts.findById(req.params.id, function (err, user) {
+router.get('/id/:id', async (req, res) => {
+	await accounts.findById(req.params.id, function (err, user) {
 		if (err) {
 			return res.status(500).send("There was a problem adding the information to the database.");
 		}else if(!user){
@@ -40,8 +39,8 @@ router.post('/id/:id', async (req, res) => {
 
 // Updates a single user in the database
 router.post('/id/:id', VerifyToken, async (req, res) => {
-	let hashedPassword = bcrypt.hashSync(req.body.password, 8);
-	accounts.findByIdAndUpdate(req.params.id, function (err, user) {
+	//let hashedPassword = bcrypt.hashSync(req.body.password, 8);
+	await accounts.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
 		if (err) {
 			return res.status(500).send("There was a problem adding the information to the database.");
 		}else if(!user){
