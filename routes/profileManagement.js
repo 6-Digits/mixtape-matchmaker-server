@@ -36,6 +36,7 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 				}
 				return res.status(200).send(user);
 			}).catch((error)=>{
+				//console.log(error);
 				return res.status(500).send("There was a problem accessing to the database.1");
 			})
 		} else {

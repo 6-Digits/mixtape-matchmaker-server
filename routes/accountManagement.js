@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const accounts = require('../models/account');
+const notifications = require('../models/notification');
 const verifyToken = require('../authentication/verifyToken');
 const bcrypt = require('bcryptjs');
 
@@ -32,6 +33,18 @@ router.post('/id/:id', verifyToken, async (req, res) => {
 			res.status(200).send(user);
 		}
 	});
+})
+
+router.get('/notifications/:id', async (req, res) => {
+	await notifications.find({ user: req.params.id}).then((result)=>{
+		if(!result){
+			return res.status(404).send("No user found.");
+		}
+		return res.status(200).send(result);
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("There was a problem adding the information to the database.");
+	})
 })
 
 module.exports = router;

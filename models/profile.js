@@ -22,11 +22,11 @@ let profileSchema = new Schema({
         default: ""
     },
     profileLikes: {
-        type: [Schema.Types.ObjectId],
+        type: Map,
         default: []
     },
     profileDislikes: {
-        type: [Schema.Types.ObjectId],
+        type: Map,
         default: []
     },
     mixtapeHearts: {
