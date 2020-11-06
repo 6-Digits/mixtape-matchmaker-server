@@ -57,14 +57,18 @@ router.post('/register', async (req, res) => {
             expiresIn: 86400 // expires in 24 hours
         });
         let name = req.body.firstName + req.body.lastName;
+        console.log(req.body);
         await profiles.create({
             name: name,
             userName: name,
-            //gender: req.body.gender,
-            //dob: res.body.dob,
+            gender: req.body.gender,
+            dob: req.body.dob,
         }).then((result)=>{
             return res.status(200).send({ auth: true, token: token, id: result._id });
-        }).catch(error => console.log(error));
+        }).catch((error) => {
+            console.log(error)
+            return res.status(500).send("Error creating profile in database")
+        });
     }).catch((err) => {
         console.log(err)
         return res.status(500).send("There was a problem registering the user`.");
