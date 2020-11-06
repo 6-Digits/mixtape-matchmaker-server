@@ -60,8 +60,8 @@ router.post('/register', async (req, res) => {
         await profiles.create({
             name: name,
             userName: name,
-            gender: req.body.gender,
-            dob: res.body.dob,
+            //gender: req.body.gender,
+            //dob: res.body.dob,
         }).then((result)=>{
             return res.status(200).send({ auth: true, token: token, id: result._id });
         }).catch(error => console.log(error));

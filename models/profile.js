@@ -12,7 +12,7 @@ let profileSchema = new Schema({
     },
     gender: {
         type: String,
-        required: true
+        default: ""
     },
     dob: {
         type: Date,
