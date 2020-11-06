@@ -59,6 +59,7 @@ router.post('/register', async (req, res) => {
         let name = req.body.firstName + req.body.lastName;
         console.log(req.body);
         await profiles.create({
+            _id: result._id,
             name: name,
             userName: name,
             gender: req.body.gender,
