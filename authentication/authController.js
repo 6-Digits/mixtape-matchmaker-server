@@ -63,7 +63,7 @@ router.post('/register', async (req, res) => {
             return res.status(200).send({ auth: true, token: token, id: result._id });
         }).catch(error => console.log(error));
     }).catch((err) => {
-        console.log(err)
+        //console.log(err)
         return res.status(500).send("There was a problem registering the user`.");
     })
 });
