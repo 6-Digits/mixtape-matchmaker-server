@@ -28,9 +28,6 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	await accounts.findById(req.params.id, function (err, user) {
 		return user, err;
 	}).then(async (result, error) => {
-		console.log("First query returns")
-		console.log(error)
-		console.log(result)
 		let passwordIsValid = bcrypt.compareSync(req.body.password, result.password);
 		if (passwordIsValid) {
 			/*Assumes that the old password is embedded into the JSON object*/

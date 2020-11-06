@@ -16,7 +16,6 @@ let profileSchema = new Schema({
     },
     dob: {
         type: Date,
-        required: true
     },
     description: {
         type: String,
@@ -31,7 +30,8 @@ let profileSchema = new Schema({
         default: []
     },
     mixtapeHearts: {
-        type: Array
+        type: Array,
+        default: []
     },
     imgSrc: {
         type: String,

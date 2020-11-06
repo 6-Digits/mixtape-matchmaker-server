@@ -9,6 +9,7 @@ const verifyToken = require('./verifyToken');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 const accounts = require('../models/account');
+const profiles = require('../models/profile');
 
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
@@ -33,7 +34,7 @@ router.post('/login', async (req, res) => {
         });
 
         // return the information including token as JSON
-        res.status(200).send({ auth: true, token: token , id: user._id});
+        res.status(200).send({ auth: true, token: token, id: user._id });
     });
 
 });
@@ -47,19 +48,24 @@ router.post('/register', async (req, res) => {
     await accounts.create({
         email: req.body.email,
         password: hashedPassword
-    }, (err, user) => {
-        if (err) {
-            return res.status(500).send("There was a problem registering the user`.");
-        }
+    }).then(async (result) => {
         // if user is registered without errors
         // create a token
         let token = jwt.sign({ id: user._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
-
-        res.status(200).send({ auth: true, token: token });
-    });
-
+        await profiles.create({
+            name: req.body.name,
+            userName: req.body.name,
+            gender: req.body.gender,
+            //dob: res.body.dob,
+        }).then((result)=>{
+            return res.status(200).send({ auth: true, token: token, id: result._id });
+        }).catch(error => console.log(error));
+    }).catch((err) => {
+        console.log(err)
+        return res.status(500).send("There was a problem registering the user`.");
+    })
 });
 
 router.get('/me', verifyToken, async (req, res, next) => {
