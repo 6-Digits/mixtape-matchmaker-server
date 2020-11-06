@@ -40,36 +40,15 @@ app.use('/api/profile', profileManagement);
 const matchManagement = require('./routes/matchManagement');
 app.use('/api/match', matchManagement);
 
-// initialize passport
-const passport = require('passport');
-app.use(passport.initialize());
-app.use(passport.session());
 
 // initialize MongoDB
 const mongoose = require('mongoose');
-const mongoUri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@cluster0.vq24q.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority`
+const mongoUri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.vq24q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
 mongoose.connect(mongoUri, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 }).then(() => {
 	console.log("Connected to the MongoDB database");
 });
-
-// create user login schema (TODO: change this)
-const Schema = mongoose.Schema;
-const UserDetail = new Schema({
-	username: String,
-	passport: String
-});
-
-// passport automagical stuff
-const passportLocalMongoose = require('passport-local-mongoose');
-UserDetail.plugin(passportLocalMongoose);
-const UserDetails = mongoose.model('userInfo', UserDetail, 'userInfo');
-passport.use(UserDetails.createStrategy());
-passport.serializeUser(UserDetails.serializeUser());
-passport.deserializeUser(UserDetails.deserializeUser());
-
-// need views and routes
 
 module.exports = app;

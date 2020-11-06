@@ -1,23 +1,21 @@
+require('dotenv').config()
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
 
-const VerifyToken = require('./VerifyToken');
+const verifyToken = require('./verifyToken');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 const accounts = require('../models/account');
 const profiles = require('../models/profile');
 
-/**
- * Configure JWT
- */
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
-const config = require('../config'); // get config file
+
 
 router.post('/login', async (req, res) => {
-    console.log(req.body.email);
     await accounts.findOne({ email: req.body.email }, (err, user) => {
         if (err) {
             return res.status(500).send('Error on the server.');
@@ -31,7 +29,7 @@ router.post('/login', async (req, res) => {
 
         // if user is found and password is valid
         // create a token
-        let token = jwt.sign({ id: user._id }, config.secret, {
+        let token = jwt.sign({ id: user._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
 
@@ -53,7 +51,7 @@ router.post('/register', async (req, res) => {
     }).then(async (result) => {
         // if user is registered without errors
         // create a token
-        var token = jwt.sign({ id: result._id }, config.secret, {
+        let token = jwt.sign({ id: user._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
         await profiles.create({
@@ -70,7 +68,7 @@ router.post('/register', async (req, res) => {
     })
 });
 
-router.get('/me', VerifyToken, async (req, res, next) => {
+router.get('/me', verifyToken, async (req, res, next) => {
     await accounts.findById(req.userId, { password: 0 },
         (err, user) => {
             if (err) {
@@ -82,5 +80,54 @@ router.get('/me', VerifyToken, async (req, res, next) => {
             res.status(200).send(user);
         });
 });
+
+router.post('/resetPassword', async (req, res) => {
+    if (req.body.email == '') {
+        res.status(400).send('No email provided');
+    }
+    
+    await accounts.findOne({ email: req.body.email }, (err, user) => {
+        if (err) {
+            return res.status(500).send('Error on the server.');
+        } else if (!user) {
+            return res.status(404).send('No user found.');
+        }
+        
+        let password = "abc123";
+        let hashedPassword = bcrypt.hashSync(password, 8);
+        
+        // reset password
+        accounts.updateOne({ email: user.email }, 
+            { password: hashedPassword }, 
+            (err, docs) => {
+                if (err) {
+                    return res.status(500).send('Error on the server.');
+                }
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: `${process.env.EMAIL_ADDRESS}`,
+                        pass: `${process.env.EMAIL_PASSWORD}`
+                    }
+                });
+                const mailOptions = {
+                    from: `${process.env.EMAIL_ADDRESS}`,
+                    to: `${user.email}`,
+                    subject: 'Mixtape Matchmaker Password Reset',
+                    text: `Your password has been reset. \n\n Your new password is: ${password} \n\n Please login and change this immediately.`
+                };
+                transporter.sendMail(mailOptions, (err, res) => {
+                    if (err) {
+                        return res.status(500).send('Error on the server.');
+                    }
+                    console.log('email sent');
+                    res.status(200).send('password reset, email sent');
+                })
+        });
+
+        // return the information including token as JSON
+        res.status(200).send('password reset, email sent');
+    });
+})
 
 module.exports = router;
