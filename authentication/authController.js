@@ -44,26 +44,29 @@ router.get('/logout', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
+    console.log("registering users");
     let hashedPassword = bcrypt.hashSync(req.body.password, 8);
+    let token = null;
     await accounts.create({
         email: req.body.email,
         password: hashedPassword
     }).then(async (result) => {
         // if user is registered without errors
         // create a token
-        let token = jwt.sign({ id: user._id }, process.env.KEY, {
+        token = jwt.sign({ id: result._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
+        let name = req.body.firstName + req.body.lastName;
         await profiles.create({
-            name: req.body.name,
-            userName: req.body.name,
+            name: name,
+            userName: name,
             gender: req.body.gender,
             //dob: res.body.dob,
         }).then((result)=>{
             return res.status(200).send({ auth: true, token: token, id: result._id });
         }).catch(error => console.log(error));
     }).catch((err) => {
-        //console.log(err)
+        console.log(err)
         return res.status(500).send("There was a problem registering the user`.");
     })
 });
