@@ -37,6 +37,8 @@ const accountManagement = require('./routes/accountManagement');
 app.use('/api/account', accountManagement);
 const profileManagement = require('./routes/profileManagement');
 app.use('/api/profile', profileManagement);
+const mixtapeManagement = require('./routes/mixtapeManagement');
+app.use('/api/mixtape', mixtapeManagement);
 const matchManagement = require('./routes/matchManagement');
 app.use('/api/match', matchManagement);
 

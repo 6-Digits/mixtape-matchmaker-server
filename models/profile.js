@@ -23,15 +23,15 @@ let profileSchema = new Schema({
     },
     profileLikes: {
         type: Map,
-        default: []
+        default: {}
     },
     profileDislikes: {
         type: Map,
-        default: []
+        default: {}
     },
     mixtapeHearts: {
-        type: Array,
-        default: []
+        type: Map,
+        default: {}
     },
     imgSrc: {
         type: String,

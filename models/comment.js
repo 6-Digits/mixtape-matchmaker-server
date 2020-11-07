@@ -6,10 +6,13 @@ let commentSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: true
     },
+    mixtape: {
+        type: Schema.Types.ObjectId,
+        required: true
+    },
     date: {
         type: Date,
-        required: true,
-        default: Date.now
+        default: Date.now()
     },
     text: {
         type: String,
