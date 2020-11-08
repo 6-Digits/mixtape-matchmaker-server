@@ -51,6 +51,9 @@ router.get('/uid/:id', async (req, res) => {
 		Promise.all(requests).then((result) => {
 			//console.log(result);
 			return res.status(200).send(result);
+		}).catch((error)=>{
+			console.log(error);
+			return res.status(500).send("Promise error, good luck.")
 		})
 	}).catch((error) => {
 		console.log(error);
@@ -58,50 +61,119 @@ router.get('/uid/:id', async (req, res) => {
 	});
 })
 
-let helper = (mixtapeArray, returnJSON) => {
-	mixtapeArray.forEach(async (mixtape) => {
-		await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
-			await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
-				mixtape['songList'] = songs;
-				mixtape['comments'] = comment;
-				returnJSON.push(mixtape);
-			}).catch((error) => {
-				console.log(error)
-				return res.status(500).send("There was an error finding the comments.")
-			});
-		}).catch((error) => {
-			console.log(error);
-			return res.status(500).send("There is a problem with finding the songs.")
-		})
-	})
-	return returnJSON;
-}
-
 // Gets a list of mixtapes from the database based their view count
 router.get('/popular', async (req, res) => {
-	await mixtapes.find().sort({ views: -1 }).limit(20).then((result) => {
-		if (!result) {
+	await mixtapes.find().sort({ views: -1 }).limit(20).then((mixtapes) => {
+		//console.log(mixtapes);
+		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		return res.status(200).send(result);
+		let requests = mixtapes.map((mixtape) => {
+			return new Promise(async (resolve) => {
+				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
+					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
+						mixtape['songList'] = songs;
+						mixtape['comments'] = comment;
+						resolve(mixtape);
+					}).catch((error) => {
+						console.log(error)
+						resolve(res.status(500).send("There was an error finding the comments."))
+					});
+				}).catch((error) => {
+					console.log(error);
+					resolve(res.status(500).send("There is a problem with finding the songs."))
+				});
+				resolve(mixtapes);
+			});
+		});
+		Promise.all(requests).then((result) => {
+			//console.log(result);
+			return res.status(200).send(result);
+		}).catch((error)=>{
+			console.log(error);
+			return res.status(500).send("Promise error, good luck.")
+		})
 	}).catch((error) => {
 		console.log(error);
-		return res.send(500).send("There is a problem with accessing the database");
+		return res.status(500).send("There is a problem with finding the mixtape.");
 	});
-});
+})
 
 // Gets a list of mixtapes from the database based their view count
 router.get('/likes', async (req, res) => {
-	await mixtapes.find().sort({ hearts: -1 }).limit(20).then((result) => {
-		if (!result) {
+	await mixtapes.find().sort({ views: -1 }).limit(20).then((mixtapes) => {
+		//console.log(mixtapes);
+		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		return res.status(200).send(result);
+		let requests = mixtapes.map((mixtape) => {
+			return new Promise(async (resolve) => {
+				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
+					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
+						mixtape['songList'] = songs;
+						mixtape['comments'] = comment;
+						resolve(mixtape);
+					}).catch((error) => {
+						console.log(error)
+						resolve(res.status(500).send("There was an error finding the comments."))
+					});
+				}).catch((error) => {
+					console.log(error);
+					resolve(res.status(500).send("There is a problem with finding the songs."))
+				});
+				resolve(mixtapes);
+			});
+		});
+		Promise.all(requests).then((result) => {
+			//console.log(result);
+			return res.status(200).send(result);
+		}).catch((error)=>{
+			console.log(error);
+			return res.status(500).send("Promise error, good luck.")
+		})
 	}).catch((error) => {
 		console.log(error);
-		return res.send(500).send("There is a problem with accessing the database");
+		return res.status(500).send("There is a problem with finding the mixtape.");
 	});
-});
+})
+
+// Gets a list of mixtapes from the database based the search query, extremely simple implementation
+router.get('/search/:query', async (req, res) => {
+	await mixtapes.find({ name: {$regex: req.params.query, $options: "i"} }).sort({ views: -1 }).limit(20).then((mixtapes) => {
+		//console.log(mixtapes);
+		if (!mixtapes) {
+			return res.status(404).send("No mixtapes found.");
+		}
+		let requests = mixtapes.map((mixtape) => {
+			return new Promise(async (resolve) => {
+				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
+					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
+						mixtape['songList'] = songs;
+						mixtape['comments'] = comment;
+						resolve(mixtape);
+					}).catch((error) => {
+						console.log(error)
+						resolve(res.status(500).send("There was an error finding the comments."))
+					});
+				}).catch((error) => {
+					console.log(error);
+					resolve(res.status(500).send("There is a problem with finding the songs."))
+				});
+				resolve(mixtapes);
+			});
+		});
+		Promise.all(requests).then((result) => {
+			//console.log(result);
+			return res.status(200).send(result);
+		}).catch((error)=>{
+			console.log(error);
+			return res.status(500).send("Promise error, good luck.")
+		})
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with finding the mixtape.");
+	});
+})
 
 // Gets songs in that mixtape
 // Depreciated by Jason
