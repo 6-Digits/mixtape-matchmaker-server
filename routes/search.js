@@ -40,7 +40,7 @@ function attachListeners() {
     predictionsElement = document.getElementById('predictions');
 
     searchInputElement.addEventListener('keyup', function (event) {
-        letvalue = event.target.value,
+        let value = event.target.value,
             predictions = predict(value) || [];
         predictionsElement.innerHTML = predictions.join('<br>');
     });
@@ -56,7 +56,7 @@ build(()=> {
 });
 
 addItemToMap((mapNode, pathArray, weight, index)=> {
-    letletter;
+    let letter;
 
     if (pathArray && pathArray.length) {
         letter = pathArray.shift();
@@ -74,7 +74,7 @@ addItemToMap((mapNode, pathArray, weight, index)=> {
 })
 
 managePredictions((predictions, index)=> {
-    letinsertionIndex = getInsertionIndex(predictions, index);
+    let insertionIndex = getInsertionIndex(predictions, index);
 
     predictions.splice(insertionIndex, 0, index);
     if (predictions.length > MAX_PREDICTIONS_COUNT) {
@@ -83,7 +83,7 @@ managePredictions((predictions, index)=> {
 })
 
 function getInsertionIndex(array, index) {
-    letlow = 0,
+    let low = 0,
         high = array.length,
         middle;
 
@@ -99,11 +99,11 @@ function getInsertionIndex(array, index) {
 };
 
 function predict(searchTerm) {
-    letpredictionObject = findPredictions(searchTerm.split(''), map),
+    let predictionObject = findPredictions(searchTerm.split(''), map),
         result = [];
 
     if (predictionObject) {
-        for (leti = 0; i < predictionObject.predictions.length; i++) {
+        for (let i = 0; i < predictionObject.predictions.length; i++) {
             result.push(dictionary[predictionObject.predictions[i]].word);
         };
         return result;
@@ -111,7 +111,7 @@ function predict(searchTerm) {
 };
 
 function findPredictions(searchTermArray, object) {
-    letpathArray,
+    let pathArray,
         key;
 
     if (searchTermArray && searchTermArray.length) {
