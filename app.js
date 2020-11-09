@@ -1,6 +1,5 @@
 // load .env variables
 require('dotenv').config()
-
 // create express app
 const express = require('express');
 const app = express();
@@ -41,7 +40,8 @@ const mixtapeManagement = require('./routes/mixtapeManagement');
 app.use('/api/mixtape', mixtapeManagement);
 const matchManagement = require('./routes/matchManagement');
 app.use('/api/match', matchManagement);
-
+const search = require('./routes/search');
+app.use('/api/search', search);
 
 // initialize MongoDB
 const mongoose = require('mongoose');

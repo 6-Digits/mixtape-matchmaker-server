@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
-const accounts = require('../models/account');
-const verifyToken = require('../authentication/verifyToken');
-const bcrypt = require('bcryptjs');
+const mixtapes = require('../models/mixtape');
 
+router.use(bodyParser.urlencoded({ extended: true }));
 const MAX_PREDICTIONS_COUNT = 5,
     dictionary = [{
         word: 'abba',
@@ -31,31 +30,31 @@ const MAX_PREDICTIONS_COUNT = 5,
         word: 'adcg',
         weight: 120
     }],
-    map = {},
-    searchInputElement,
-    predictionsElement;
+    map = {};
+async function serverStart () {
+    await mixtapes.find().then((results) => {
+        results.forEach((mixtape) => {
+            dictionary.push({ word: mixtape.name.toLowerCase(), weight: 100 })
 
-function attachListeners() {
-    searchInputElement = document.getElementById('search-input');
-    predictionsElement = document.getElementById('predictions');
-
-    searchInputElement.addEventListener('keyup', function (event) {
-        let value = event.target.value,
-            predictions = predict(value) || [];
-        predictionsElement.innerHTML = predictions.join('<br>');
-    });
-};
-
-build(()=> {
+        })
+        console.log(dictionary)
+        buildMap();
+        //return res.status(200).send("Search ready.");
+    }).catch((error) => {
+        console.log(error);
+        //return res.status(500).send("Error")
+    })
+}
+function buildMap() {
     let item, pathArray;
     for (let i = 0; i < dictionary.length; i++) {
         item = dictionary[i];
         pathArray = item.word.split('');
         addItemToMap(map, pathArray, item.weight, i);
     };
-});
+};
 
-addItemToMap((mapNode, pathArray, weight, index)=> {
+function addItemToMap(mapNode, pathArray, weight, index) {
     let letter;
 
     if (pathArray && pathArray.length) {
@@ -71,16 +70,16 @@ addItemToMap((mapNode, pathArray, weight, index)=> {
         }
         addItemToMap(mapNode[letter].children, pathArray, weight, index);
     }
-})
+};
 
-managePredictions((predictions, index)=> {
+function managePredictions(predictions, index) {
     let insertionIndex = getInsertionIndex(predictions, index);
 
     predictions.splice(insertionIndex, 0, index);
     if (predictions.length > MAX_PREDICTIONS_COUNT) {
         predictions = predictions.splice(-1, 1);
     }
-})
+};
 
 function getInsertionIndex(array, index) {
     let low = 0,
@@ -124,5 +123,12 @@ function findPredictions(searchTermArray, object) {
     }
 };
 
-buildMap();
-attachListeners();
+router.get('/:query', /*VerifyToken(),*/ async (req, res) => {
+    let value = req.params.query;
+    let predictions = predict(value) || [];
+    return res.status(200).send(predictions);
+});
+
+serverStart();
+
+module.exports = router;
