@@ -66,7 +66,7 @@ router.get('/uid/:id', async (req, res) => {
 
 // Gets a list of mixtapes from the database based their view count
 router.get('/popular', async (req, res) => {
-	await mixtapes.find().sort({ views: -1 }).limit(20).then((mixtapes) => {
+	await mixtapes.find({public : true}).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		//console.log(mixtapes);
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
@@ -104,7 +104,7 @@ router.get('/popular', async (req, res) => {
 
 // Gets a list of mixtapes from the database based their view count
 router.get('/likes', async (req, res) => {
-	await mixtapes.find().sort({ views: -1 }).limit(20).then((mixtapes) => {
+	await mixtapes.find({public : true}).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		//console.log(mixtapes);
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
