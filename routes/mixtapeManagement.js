@@ -31,22 +31,14 @@ router.get('/uid/:id', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		//console.log(mixtapes);
+		console.log(mixtapes);
 		let requests = mixtapes.map((mixtape) => {
+			//console.log(mixtape)
 			return new Promise(async (resolve) => {
-				console.log(mixtape.songList)
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
-					//.log(songs)
-					//console.log("break")
-					if(!songs){
-						songs = [];
-					}
-					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
-						if(!comment){
-							comment = [];
-						}
-						mixtape['songList'] = songs;
-						mixtape['comments'] = comment;
+					mixtape['songList'] = songs ? songs : [];
+					await comments.find({ _id: { $in: mixtape.comments } }).then((comments) => {
+						mixtape['comments'] = comments ? comments : [];
 						resolve(mixtape);
 					}).catch((error) => {
 						console.log(error)
@@ -82,9 +74,9 @@ router.get('/popular', async (req, res) => {
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
-					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
-						mixtape['songList'] = songs;
-						mixtape['comments'] = comment;
+					mixtape['songList'] = songs ? songs : [];
+					await comments.find({ _id: { $in: mixtape.comments } }).then((comments) => {
+						mixtape['comments'] = comments ? comments : [];
 						resolve(mixtape);
 					}).catch((error) => {
 						console.log(error)
@@ -120,9 +112,9 @@ router.get('/likes', async (req, res) => {
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
-					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
-						mixtape['songList'] = songs;
-						mixtape['comments'] = comment;
+					mixtape['songList'] = songs ? songs : [];
+					await comments.find({ _id: { $in: mixtape.comments } }).then((comments) => {
+						mixtape['comments'] = comments ? comments : [];
 						resolve(mixtape);
 					}).catch((error) => {
 						console.log(error)
