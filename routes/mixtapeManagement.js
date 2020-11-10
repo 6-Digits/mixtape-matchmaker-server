@@ -34,10 +34,11 @@ router.get('/uid/:id', async (req, res) => {
 		//console.log(mixtapes);
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
-				await songs.findById({ $in: mixtape.songList }).then(async (songs) => {
+				console.log(mixtape.songList);
+				await songs.findById(mixtape.songList).then(async (songs) => {
 					await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
-						mixtape['songList'] = songs;
-						mixtape['comments'] = comment;
+						mixtape['songList'] = songs ? songs : [];
+						mixtape['comments'] = comment ? comment : [];
 						resolve(mixtape);
 					}).catch((error) => {
 						console.log(error)
