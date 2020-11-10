@@ -11,7 +11,7 @@ let mixtapeSchema = new Schema({
         default: ""
     },
     public: {
-        type: String,
+        type: Boolean,
         default: false
     },
     views: {
