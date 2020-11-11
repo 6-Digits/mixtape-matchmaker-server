@@ -208,7 +208,7 @@ router.get('/viewMixtape/id/:id', async (req, res) => {
 // Creates a mixtape in the database
 router.post('/createMixtape/uid/:uid', /*verifyToken,*/ async (req, res) => {
 	await mixtapes.create({
-		owner: req.params.id
+		owner: req.params.uid
 	}).then(async (result) => {
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the mixtape.");
