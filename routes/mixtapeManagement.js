@@ -206,10 +206,32 @@ router.get('/viewMixtape/id/:id', async (req, res) => {
 });
 
 // Creates a mixtape in the database
-router.post('/createMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
+router.post('/createMixtape/uid/:uid', /*verifyToken,*/ async (req, res) => {
 	await mixtapes.create({
 		owner: req.params.id
 	}).then(async (result) => {
+		if (!result) {
+			return res.status(404).send("There is a problem with creating the mixtape.");
+		}
+		return res.status(200).send(result);
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with the database.");
+	});
+});
+
+// Creates a mixtape in the database
+router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
+	await mixtapes.findByIdAndUpdate(req.params.id, {
+		name: req.body.name,
+		description: req.body.description,
+		public: req.body.public,
+		views: req.body.views,
+		songList: req.body.songList,
+		hearts: req.body.hearts,
+		comments: req.body.comments,
+		match: req.body.match
+	}, {new: true}).then(async (result) => {
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the mixtape.");
 		}
