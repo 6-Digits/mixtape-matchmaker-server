@@ -22,8 +22,8 @@ const expressSession = require('express-session')({
 app.use(expressSession);
 
 // Chat
-//const chat = require('./chatServer');
-//
+const chat = require('./chatServer');
+
 
 // start server on port 42049
 const port = process.env.PORT || 42069;
