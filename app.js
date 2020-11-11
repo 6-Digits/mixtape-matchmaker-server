@@ -3,6 +3,8 @@ require('dotenv').config()
 // create express app
 const express = require('express');
 const app = express();
+const server = require("http").createServer();
+const io = require("socket.io")(server);
 const cors = require('cors');
 
 app.use(cors());
@@ -18,6 +20,10 @@ const expressSession = require('express-session')({
 	saveUninitialized: false
 });
 app.use(expressSession);
+
+// Chat
+//const chat = require('./chatServer');
+//
 
 // start server on port 42049
 const port = process.env.PORT || 42069;
