@@ -15,8 +15,6 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		if (!user) {
 			return res.status(404).send("No user found.");
 		} else {
-			user['dob'] = '1998-11-14';
-			//console.log(user['dob']);
 			res.status(200).send(user);
 		}
 	}).catch((error) =>{
