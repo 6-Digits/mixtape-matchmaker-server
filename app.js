@@ -42,6 +42,8 @@ const matchManagement = require('./routes/matchManagement');
 app.use('/api/match', matchManagement);
 const search = require('./routes/search');
 app.use('/api/search', search);
+const youtube = require('./routes/youtube');
+app.use('/api/youtube', youtube);
 
 // initialize MongoDB
 const mongoose = require('mongoose');
