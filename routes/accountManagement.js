@@ -23,7 +23,9 @@ router.get('/id/:id', async (req, res) => {
 // Updates a single user in the database
 router.post('/id/:id', verifyToken, async (req, res) => {
 	if (req.body.password == null || req.body.password == ""){
+		let hashedPassword = bcrypt.hashSync(req.body.oldPassword, 8);
 		delete req.body['oldPassword']
+		req.body['password'] = hashedPassword;
 		await accounts.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
 			if (err) {
 				return res.status(500).send("There was a problem adding the information to the database.");
