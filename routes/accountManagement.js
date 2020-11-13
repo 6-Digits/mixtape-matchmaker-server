@@ -21,18 +21,20 @@ router.get('/id/:id', async (req, res) => {
 })
 
 // Updates a single user in the database
-router.post('/id/:id', verifyToken, async (req, res) => {
-	let hashedPassword = bcrypt.hashSync(req.body.oldPassword, 8);
-	delete req.body['oldPassword'];
-	await accounts.findById(req.params.id, { new: true }, async (err, user) => {
+router.post('/id/:id', /*verifyToken,*/ async (req, res) => {
+	console.log(req.body)
+	await accounts.findOne({_id: req.params.id}, async (err, dbUser) => {
 		if (err) {
 			return res.status(500).send("There was a problem adding the information to the database.");
-		} else if (!user) {
+		} else if (!dbUser) {
 			return res.status(404).send("No user found.");
 		} else {
-			if (hashedPassword == user.password) {
-				if (req.body.password == null){
-					req.body['password'] = hashedPassword;
+			let passwordIsValid = bcrypt.compareSync(req.body.oldPassword, dbUser.password);
+			delete req.body['oldPassword'];
+			if (passwordIsValid) {
+				if (req.body.password != null){
+					let hashedPassword = bcrypt.hashSync(req.body.password, 8);
+					req.body.password = hashedPassword;
 				}
 				await accounts.findByIdAndUpdate(req.params.id, req.body, { new: true }, function (err, user) {
 					if (err) {
