@@ -2,7 +2,7 @@
 require('dotenv').config()
 // create express app
 const express = require('express');
-const app = express();
+const app = require('express')();
 const cors = require('cors');
 
 app.use(cors());
@@ -19,8 +19,11 @@ const expressSession = require('express-session')({
 });
 app.use(expressSession);
 
+// Chat
+const chat = require('./chatServer');
+
 // start server on port 42049
-const port = process.env.PORT || 42069;
+const port = 42069;
 app.listen(port, () => {
 	console.log(`Server running at port: ${port}`);
 	console.log(`MongoDB URI on: ${mongoUri}`);
