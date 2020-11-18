@@ -42,6 +42,7 @@ router.post('/id/:id', /*verifyToken,*/ async (req, res) => {
 					} else if (!user) {
 						return res.status(404).send("No user found.");
 					} else {
+						delete user['password'];
 						res.status(200).send(user);
 					}
 				});
