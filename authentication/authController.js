@@ -57,7 +57,7 @@ router.post('/register', async (req, res) => {
             expiresIn: 86400 // expires in 24 hours
         });
         let name = req.body.firstName + req.body.lastName;
-        console.log(req.body);
+        //console.log(req.body);
         await profiles.create({
             _id: result._id,
             name: name,

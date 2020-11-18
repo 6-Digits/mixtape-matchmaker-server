@@ -37,7 +37,7 @@ async function serverStart () {
             dictionary.push({ word: mixtape.name.toLowerCase(), weight: 100 })
 
         })
-        console.log(dictionary)
+        //console.log(dictionary)
         buildMap();
         //return res.status(200).send("Search ready.");
     }).catch((error) => {
