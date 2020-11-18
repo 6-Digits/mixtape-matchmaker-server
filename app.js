@@ -3,8 +3,6 @@ require('dotenv').config()
 // create express app
 const express = require('express');
 const app = require('express')();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
 const cors = require('cors');
 
 app.use(cors());
@@ -22,32 +20,11 @@ const expressSession = require('express-session')({
 app.use(expressSession);
 
 // Chat
-//const chat = require('./chatServer');
-const PORT = 42069;
-const NEW_CHAT_MESSAGE_EVENT = "newChatMessage";
-
-io.on("connection", (socket) => {
-  console.log(`Client ${socket.id} connected`);
-
-  // Join a conversation
-  const { roomId } = socket.handshake.query;
-  socket.join(roomId);
-
-  // Listen for new messages
-  socket.on(NEW_CHAT_MESSAGE_EVENT, (data) => {
-    io.in(roomId).emit(NEW_CHAT_MESSAGE_EVENT, data);
-  });
-
-  // Leave the room if the user closes the socket
-  socket.on("disconnect", () => {
-    console.log(`Client ${socket.id} disconnected`);
-    socket.leave(roomId);
-  });
-});
+const chat = require('./chatServer');
 
 // start server on port 42049
 const port = 42069;
-server.listen(port, () => {
+app.listen(port, () => {
 	console.log(`Server running at port: ${port}`);
 	console.log(`MongoDB URI on: ${mongoUri}`);
 });

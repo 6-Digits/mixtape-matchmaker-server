@@ -1,6 +1,7 @@
 const server = require("http").createServer();
 const io = require("socket.io")(server);
-
+const messages = require('./models/message');
+const chats = require('./models/chat');
 const PORT = 4000;
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage";
 
@@ -12,8 +13,23 @@ io.on("connection", (socket) => {
   socket.join(roomId);
 
   // Listen for new messages
-  socket.on(NEW_CHAT_MESSAGE_EVENT, (data) => {
+  socket.on(NEW_CHAT_MESSAGE_EVENT, async (data) => {
     io.in(roomId).emit(NEW_CHAT_MESSAGE_EVENT, data);
+    let message = {
+      user: data.user._id,
+      text: data.body
+    }
+    //console.log(message)
+    await messages.create(message).then(async (messageDB)=>{
+      //console.log(messageDB);
+      await chats.findOneAndUpdate({$or:[{user1: messageDB.user}, {user2: messageDB.user}]}, {$push: {messages : messageDB._id}}, {new : true}).then((result)=>{
+        console.log("Success in adding messageID to chat message array")
+      }).catch((error)=>{
+        console.log(error);
+      })
+    }).catch((error)=>{
+      console.log(error);
+    })
   });
 
   // Leave the room if the user closes the socket
