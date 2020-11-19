@@ -245,6 +245,25 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 		return res.status(500).send("There is a problem with the database.");
 	});
 });
+// Assumes the req.body is in the same format as the song document in the DB.
+// If the song is already in the DB based on the videoId, the post doesn't add the song.
+router.post('/addSong', async (req, res) => {
+	await songs.findOne({videoId : req.body.videoId}).then(async (result)=>{
+		if (result){
+			return res.status(200).send("Song already in DB")
+		}else{
+			await songs.create(req.body).then((result)=>{
+				return res.status(200).send("Song successfully added to DB.")
+			}).catch((error)=>{
+				console.log(error);
+				return res.status(500).send("Error in creating song.")
+			})
+		}
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in finding song.");
+	})
+})
 
 // Deletes a mixtape in the database
 router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
