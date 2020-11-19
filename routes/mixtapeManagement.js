@@ -276,4 +276,17 @@ router.post('/createComment', verifyToken, async (req, res) => {
 	});
 });
 
+// Get the comments for a particular mixtape based on it's mixtape id
+router.get('/getComments/id/:id', verifyToken, async (req, res) => {
+	await comments.find({mixtape : req.params.id}).then(async (result) => {
+		if (!result) {
+			return res.status(404).send("There is a problem with getting the comments.");
+		}
+		return res.status(200).send(result);
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with the database.");
+	});
+});
+
 module.exports = router;
