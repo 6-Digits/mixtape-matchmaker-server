@@ -17,7 +17,7 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		} else {
 			res.status(200).send(user);
 		}
-	}).catch((error) =>{
+	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("There was a problem getting data from the DB.");
 	});
@@ -35,7 +35,7 @@ router.get('preference/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		}
 	});
 })
-
+// Depreciated
 // Updates a single user-preference in the database
 // For the frontend, note that you would have to make two calls for the settings page
 // First to update the profile, and Second to update the account settings if needed
@@ -46,32 +46,82 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		if (passwordIsValid) {
 			/*Assumes that the old password is embedded into the JSON object*/
 			delete req.body['password']
-			await profiles.findByIdAndUpdate(req.params.id, req.body, {new: true}).then((user)=>{
+			await profiles.findByIdAndUpdate(req.params.id, req.body, { new: true }).then((user) => {
 				if (!user) {
 					return res.status(404).send("No user found.");
 				}
 				return res.status(200).send(user);
-			}).catch((error)=>{
+			}).catch((error) => {
 				//console.log(error);
 				return res.status(500).send("There was a problem accessing to the database.1");
 			})
 		} else {
 			return res.status(401).send("Wrong password");
 		}
-	}).catch((error)=>{
+	}).catch((error) => {
 		//console.log(error);
 		return res.status(500).send("There was a problem with the database.3");
 	})
 })
 
+
+// Updates both account and profile settings at the same time.
+// Should use this instead of the depreciated version above.
+router.post('/uid/:id', async (req, res) => {
+	// Checks id every field is populated
+	if (req.body.name && req.body.userName && req.body.dob && req.body.gender
+		&& req.body.email && req.body.oldPassword && req.body.allowNotifications !== null) {
+		await accounts.findById(req.params.id).then(async (result) => {
+			if (!result){
+				return res.status(404).send("No user account found.");
+			}
+			let passwordIsValid = bcrypt.compareSync(req.body.oldPassword, result.password);
+			if (passwordIsValid) {
+				let profile = {
+					name: req.body.name,
+					userName: req.body.userName,
+					gender: req.body.gender,
+					dob: req.body.dob
+				}
+				let account = {
+					email: req.body.email,
+					allowNotifications: req.body.allowNotifications
+				}
+				// Checks if the password needs to be updated
+				if (req.body.newPassword !== null){
+					account['password'] = bcrypt.hashSync(req.body.newPassword, 8);
+				}
+				Promise.all([
+					await profiles.findByIdAndUpdate(req.params.id, profile, { new : true }),
+					await accounts.findByIdAndUpdate(req.params.id, account, { new : true })
+				])
+				.then(([returnProfile, returnAccount]) => {
+					if (!returnProfile || !returnAccount) {
+						return res.status(404).send("No user found.");
+					}
+					return res.status(200).send([returnProfile, returnAccount]);
+				}).catch((error) => {
+					console.log(error);
+					return res.status(500).send("There was a problem accessing to the database.");
+				});
+			} else {
+				return res.status(401).send("Wrong password");
+			}
+		}).catch((error) => {
+			console.log(error);
+			return res.status(500).send("There was a problem with the database.");
+		})
+	}
+})
+
 // Gets all notifications based on the user id
 router.get('/notifications/id/:id', async (req, res) => {
-	await notifications.find({ user: req.params.id}).then((result)=>{
-		if(!result){
+	await notifications.find({ user: req.params.id }).then((result) => {
+		if (!result) {
 			return res.status(404).send("No user found.");
 		}
 		return res.status(200).send(result);
-	}).catch((error)=>{
+	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("There was a problem adding the information to the database.");
 	})
@@ -80,12 +130,12 @@ router.get('/notifications/id/:id', async (req, res) => {
 // Gets all notifications based on the notification id 
 // Note that calling this route sends back the delete operation timestamped
 router.post('/notifications/nid/:id', async (req, res) => {
-	await notifications.deleteOne({ _id: req.params.id}).then((result)=>{
-		if(!result){
+	await notifications.deleteOne({ _id: req.params.id }).then((result) => {
+		if (!result) {
 			return res.status(404).send("No user found.");
 		}
 		return res.status(200).send(result);
-	}).catch((error)=>{
+	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("There was a problem adding the information to the database.");
 	})
