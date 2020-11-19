@@ -149,6 +149,7 @@ router.get('/search/:query', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match && mixtape.public);
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
