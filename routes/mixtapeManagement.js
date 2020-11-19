@@ -32,6 +32,8 @@ router.get('/uid/:id', async (req, res) => {
 			return res.status(404).send("No mixtapes found.");
 		}
 		//console.log(mixtapes);
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match);
+		//console.log(mixtapes);
 		let requests = mixtapes.map((mixtape) => {
 			//console.log(mixtape)
 			return new Promise(async (resolve) => {
