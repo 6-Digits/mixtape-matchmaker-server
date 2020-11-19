@@ -259,7 +259,7 @@ router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 });
 
 // Creates a comment for a specified mixtape in the database
-// Updates the mixtapeJSON.comments
+// Assumes that you update the commentIDList in the frontend
 router.post('/createComment', verifyToken, async (req, res) => {
 	await comments.create({
 		owner: req.body.id,
