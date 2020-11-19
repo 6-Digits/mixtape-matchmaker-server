@@ -22,7 +22,7 @@ router.get('/id/:id', async (req, res) => {
 
 // Updates a single user in the database
 router.post('/id/:id', /*verifyToken,*/ async (req, res) => {
-	console.log(req.body)
+	//console.log(req.body)
 	await accounts.findOne({_id: req.params.id}, async (err, dbUser) => {
 		if (err) {
 			return res.status(500).send("There was a problem adding the information to the database.");
