@@ -110,7 +110,9 @@ router.get('/popular', async (req, res) => {
 router.get('/liked/uid/:uid', async (req, res) => {
 	await profile.findById(req.params.uid).then((result)=>{
 		let likedMixtapeIDs = Array.from(result.mixtapeHearts.keys());
-		likedMixtapeIDs.forEach()
+		let requests = likedMixtapeIDs.map((mixtapeID) => {
+
+		})
 		return res.status(404).send("Testing")
 	}).catch((error)=>{
 		console.log(error);
