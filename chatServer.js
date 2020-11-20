@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
     //console.log(message)
     await messages.create(message).then(async (messageDB)=>{
       //console.log(messageDB);
-      await chats.findOneAndUpdate({$or:[{user1: messageDB.user}, {user2: messageDB.user}]}, {$push: {messages : messageDB._id}}, {new : true}).then((result)=>{
+      await chats.findOneAndUpdate({_id: roomId}, {$push: {messages : messageDB._id}}, {new : true}).then((result)=>{
         console.log("Success in adding messageID to chat message array")
       }).catch((error)=>{
         console.log(error);

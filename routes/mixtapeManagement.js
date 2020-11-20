@@ -74,6 +74,7 @@ router.get('/popular', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match && mixtape.public);
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
@@ -106,12 +107,14 @@ router.get('/popular', async (req, res) => {
 })
 
 // Gets a list of mixtapes from the database based their like count
-router.get('/likes', async (req, res) => {
+router.get('/liked/uid/:uid', async (req, res) => {
+	
 	await mixtapes.find({public : true}).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		//console.log(mixtapes);
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match && mixtape.public);
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {

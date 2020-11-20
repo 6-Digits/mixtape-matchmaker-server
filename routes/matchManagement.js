@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const preferences = require('../models/preference');
+const chats = require('../models/chat');
 const VerifyToken = require('../authentication/verifyToken');
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -31,6 +32,20 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		}
 	});
 })
+
+router.get('/chat/uid/:uid', async (req, res) => {
+	await chats.find({$or: [{user1 : req.params.uid}, {user2 : req.params.uid}]}).then((result)=>{
+		if (!result){
+			return res.status(404).send("No chat found.")
+		}else{
+			return res.status(200).send(result);
+		}
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in chat DB.")
+	})
+})
+
 
 // Gets an entire list of matched users
 router.get('/matchList', /*VerifyToken(),*/ async (req, res) => {
