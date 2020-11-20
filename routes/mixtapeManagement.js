@@ -106,9 +106,17 @@ router.get('/popular', async (req, res) => {
 	});
 })
 
-// Gets a list of mixtapes from the database based their like count
+// Gets a list of mixtapes from the database that the user liked
 router.get('/liked/uid/:uid', async (req, res) => {
-	
+	await profile.findById(req.params.uid).then((result)=>{
+		let likedMixtapeIDs = Array.from(result.mixtapeHearts.keys());
+		likedMixtapeIDs.forEach()
+		return res.status(404).send("Testing")
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in profile DB.")
+	})
+	/*
 	await mixtapes.find({public : true}).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		//console.log(mixtapes);
 		if (!mixtapes) {
@@ -144,6 +152,7 @@ router.get('/liked/uid/:uid', async (req, res) => {
 		console.log(error);
 		return res.status(500).send("There is a problem with finding the mixtape.");
 	});
+	*/
 })
 
 // Gets a list of mixtapes from the database based the search query, extremely simple implementation
@@ -253,10 +262,10 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 router.post('/addSong', async (req, res) => {
 	await songs.findOne({videoId : req.body.videoId}).then(async (result)=>{
 		if (result){
-			return res.status(200).send("Song already in DB")
+			return res.status(200).send(result._id);
 		}else{
 			await songs.create(req.body).then((result)=>{
-				return res.status(200).send("Song successfully added to DB.")
+				return res.status(200).send(result._id);
 			}).catch((error)=>{
 				console.log(error);
 				return res.status(500).send("Error in creating song.")
@@ -350,8 +359,8 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 		// Disgusting
 		let string = `mixtapeHearts.${req.body.mixtapeID}`;
 		let param = {};
-		param[string] = false;
-		await profile.findByIdAndUpdate(req.body.userID, {$set : param}).then((result) => {
+		param[string] = true;
+		await profile.findByIdAndUpdate(req.body.userID, {$unset : param}).then((result) => {
 			if (!result){
 				return res.status(404).send("No result found for profile.")
 			}
