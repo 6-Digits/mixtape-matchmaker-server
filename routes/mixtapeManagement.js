@@ -32,33 +32,9 @@ router.get('/uid/:id', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		console.log(mixtapes);
-		mixtapes = mixtapes.filter(mixtape => !mixtape.match);
-		console.log(mixtapes);
 		let requests = mixtapes.map((mixtape) => {
-			//console.log(mixtape)
-			return new Promise(async (resolve) => {
-				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
-					mixtape['songList'] = songs ? songs : [];
-					await comments.find({ _id: { $in: mixtape.comments } }).then((comments) => {
-						mixtape['comments'] = comments ? comments : [];
-						resolve(mixtape);
-					}).catch((error) => {
-						console.log(error)
-						resolve(res.status(500).send("There was an error finding the comments."))
-					});
-				}).catch((error) => {
-					console.log(error);
-					resolve(res.status(500).send("There is a problem with finding the songs."))
-				});
-				resolve(mixtapes);
-			});
-		});
-		Promise.all(requests).then((result) => {
-			return res.status(200).send(result);
-		}).catch((error)=>{
-			console.log(error);
-			return res.status(500).send("Promise error, good luck.")
+			mixtape['songList'] = [];
+			
 		})
 	}).catch((error) => {
 		console.log(error);
@@ -78,22 +54,22 @@ router.get('/popular', async (req, res) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
 					mixtape['songList'] = songs ? songs : [];
-					await comments.find({ _id: { $in: mixtape.comments } }).then((comments) => {
-						mixtape['comments'] = comments ? comments : [];
-						resolve(mixtape);
-					}).catch((error) => {
-						console.log(error)
-						resolve(res.status(500).send("There was an error finding the comments."))
-					});
 				}).catch((error) => {
 					console.log(error);
-					resolve(res.status(500).send("There is a problem with finding the songs."))
+					//resolve(res.status(500).send("There is a problem with finding the songs."))
+				});
+				await comments.find({ _id: { $in: mixtape.comments } }).then((comments) => {
+					mixtape['comments'] = comments ? comments : [];
+					resolve(mixtape);
+				}).catch((error) => {
+					console.log(error)
+					//resolve(res.status(500).send("There was an error finding the comments."))
 				});
 				resolve(mixtapes);
 			});
 		});
 		Promise.all(requests).then((result) => {
-			//console.log(result);
+			console.log(result);
 			return res.status(200).send(result);
 		}).catch((error)=>{
 			console.log(error);
