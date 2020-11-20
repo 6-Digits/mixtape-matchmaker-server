@@ -376,4 +376,15 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 	})
 })
 
+router.post('/view', async (req, res) => {
+	await mixtapes.findByIdAndUpdate(req.body.mixtapeID, {$inc : {views : 1}}).then(async (result)=>{
+		if (!result){
+			return res.status(404).send("No result found for mixtape.")
+		}
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in updating the mixtape.")
+	})
+})
+
 module.exports = router;
