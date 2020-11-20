@@ -18,13 +18,13 @@ let songSchema = new Schema({
         type: String,
         default: ""
     },
+    videoId: {
+        type: String,
+        default: ""
+    },
     views: {
         type: Number,
         default: 0
-    },
-    captions: {
-        type: String,
-        default: ""
     },
     language: {
         type: String,
@@ -39,8 +39,8 @@ let songSchema = new Schema({
         default: 0
     },
     genre: {
-        type: String,
-        default: ""
+        type: Array,
+        default: []
     }
 })
 

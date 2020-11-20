@@ -81,7 +81,10 @@ router.post('/uid/:id', async (req, res) => {
 					name: req.body.name,
 					userName: req.body.userName,
 					gender: req.body.gender,
-					dob: req.body.dob
+					dob: req.body.dob,
+				}
+				if (req.body.imgSrc && req.body.imgSrc !== ""){
+					profile['imgSrc'] = req.body.imgSrc;
 				}
 				let account = {
 					email: req.body.email,
