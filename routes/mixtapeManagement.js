@@ -32,9 +32,9 @@ router.get('/uid/:id', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		//console.log(mixtapes);
+		console.log(mixtapes);
 		mixtapes = mixtapes.filter(mixtape => !mixtape.match);
-		//console.log(mixtapes);
+		console.log(mixtapes);
 		let requests = mixtapes.map((mixtape) => {
 			//console.log(mixtape)
 			return new Promise(async (resolve) => {
@@ -55,7 +55,6 @@ router.get('/uid/:id', async (req, res) => {
 			});
 		});
 		Promise.all(requests).then((result) => {
-			//console.log(result);
 			return res.status(200).send(result);
 		}).catch((error)=>{
 			console.log(error);
@@ -249,6 +248,7 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 		comments: req.body.comments,
 		match: req.body.match
 	}, {new: true}).then(async (result) => {
+		console.log(JSON.stringify(result.songList))
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the mixtape.");
 		}
