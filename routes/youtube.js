@@ -84,13 +84,22 @@ router.get('/search/:query', async (req, res) => {
 						result.itemSectionRenderer.contents.forEach(content => {
 							if (content.hasOwnProperty("videoRenderer")) {
 								let render = content.videoRenderer;
+								let duration = render.lengthText ? render.lengthText.simpleText : "";
+								let timeList = duration.split(':');
+								let totalTime = 0;
+								timeList.forEach(element => {
+									totalTime*=60;
+									totalTime+=parseInt(element);
+								});
 								let song = {
-									id: render.videoId,
+									videoId: render.videoId,
 									title: render.title.runs.reduce((a, b) => a + b.text, ""),
 									url: `https://www.youtube.com${render.navigationEndpoint.commandMetadata.webCommandMetadata.url}`,
 									author: render.ownerText.runs[0].text,
-									duration: render.lengthText ? render.lengthText.simpleText : "Live",
-									thumbnail: render.thumbnail.thumbnails[render.thumbnail.thumbnails.length - 1].url,
+									duration: totalTime,
+									imgUrl: render.thumbnail.thumbnails[render.thumbnail.thumbnails.length - 1].url,
+									apiType: 'Youtube',
+									genre: "Pop" // Needs to be changed in the future
 								};
 								json['results'].push(song);
 							}
