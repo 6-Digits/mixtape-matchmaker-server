@@ -56,7 +56,7 @@ router.post('/register', async (req, res) => {
         token = jwt.sign({ id: result._id }, process.env.KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
-        let name = req.body.firstName + req.body.lastName;
+        let name = `${req.body.firstName} ${req.body.lastName}`;
         //console.log(req.body);
         await profiles.create({
             _id: result._id,
