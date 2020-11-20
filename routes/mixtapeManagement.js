@@ -33,7 +33,7 @@ router.get('/uid/:id', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		mixtapes = mixtapes.filter(mixtape => !mixtape.match && mixtape.public);
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match);
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				let songList = mixtape.songList;
