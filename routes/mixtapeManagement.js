@@ -8,6 +8,7 @@ const songs = require('../models/song');
 const comments = require('../models/comment');
 const verifyToken = require('../authentication/verifyToken');
 const bcrypt = require('bcryptjs');
+const profile = require('../models/profile.js');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -104,7 +105,7 @@ router.get('/popular', async (req, res) => {
 	});
 })
 
-// Gets a list of mixtapes from the database based their view count
+// Gets a list of mixtapes from the database based their like count
 router.get('/likes', async (req, res) => {
 	await mixtapes.find({public : true}).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		//console.log(mixtapes);
@@ -149,6 +150,7 @@ router.get('/search/:query', async (req, res) => {
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match && mixtape.public);
 		let requests = mixtapes.map((mixtape) => {
 			return new Promise(async (resolve) => {
 				await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
@@ -222,15 +224,15 @@ router.post('/createMixtape/uid/:uid', /*verifyToken,*/ async (req, res) => {
 	});
 });
 
-// Creates a mixtape in the database
+// Updates a mixtape in the database
 router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 	await mixtapes.findByIdAndUpdate(req.params.id, {
 		name: req.body.name,
 		description: req.body.description,
 		public: req.body.public,
-		views: req.body.views,
+		//views: req.body.views,
 		songList: req.body.songList,
-		hearts: req.body.hearts,
+		//hearts: req.body.hearts,
 		comments: req.body.comments,
 		match: req.body.match
 	}, {new: true}).then(async (result) => {
@@ -243,6 +245,25 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 		return res.status(500).send("There is a problem with the database.");
 	});
 });
+// Assumes the req.body is in the same format as the song document in the DB.
+// If the song is already in the DB based on the videoId, the post doesn't add the song.
+router.post('/addSong', async (req, res) => {
+	await songs.findOne({videoId : req.body.videoId}).then(async (result)=>{
+		if (result){
+			return res.status(200).send("Song already in DB")
+		}else{
+			await songs.create(req.body).then((result)=>{
+				return res.status(200).send("Song successfully added to DB.")
+			}).catch((error)=>{
+				console.log(error);
+				return res.status(500).send("Error in creating song.")
+			})
+		}
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in finding song.");
+	})
+})
 
 // Deletes a mixtape in the database
 router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
@@ -258,7 +279,7 @@ router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 });
 
 // Creates a comment for a specified mixtape in the database
-// Updates the mixtapeJSON.comments
+// Assumes that you update the commentIDList in the frontend
 router.post('/createComment', verifyToken, async (req, res) => {
 	await comments.create({
 		owner: req.body.id,
@@ -274,5 +295,72 @@ router.post('/createComment', verifyToken, async (req, res) => {
 		return res.status(500).send("There is a problem with the database.");
 	});
 });
+
+// Get the comments for a particular mixtape based on it's mixtape id
+router.get('/getComments/id/:id', verifyToken, async (req, res) => {
+	await comments.find({mixtape : req.params.id}).then(async (result) => {
+		if (!result) {
+			return res.status(404).send("There is a problem with getting the comments.");
+		}
+		return res.status(200).send(result);
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with the database.");
+	});
+});
+
+// When a user hearts a mixtape, that mixtape's heart amount is incremented by 1 
+// Furthermore, profile.mixtapeHearts is edited to reflect the like
+// Assumes that the body contains mixtapeID and userID
+router.post('/like', /*verifyToken,*/ async (req, res) => {
+	await mixtapes.findByIdAndUpdate(req.body.mixtapeID, {$inc : {hearts : 1}}).then(async (result)=>{
+		if (!result){
+			return res.status(404).send("No result found for mixtape.")
+		}
+		// Disgusting
+		let string = `mixtapeHearts.${req.body.mixtapeID}`;
+		let param = {};
+		param[string] = true;
+		await profile.findByIdAndUpdate(req.body.userID, {$set : param}).then((result) => {
+			if (!result){
+				return res.status(404).send("No result found for profile.")
+			}
+			return res.status(200).send("Success.")
+		}).catch((error)=>{
+			console.log(error);
+			return res.status(500).send("Error in updating the profile.")
+		})
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in updating the mixtape.")
+	})
+})
+
+// When a user hearts a mixtape, that mixtape's heart amount is incremented by 1 
+// Furthermore, profile.mixtapeHearts is edited to reflect the like
+// Assumes that the body contains mixtapeID and userID
+router.post('/unlike', /*verifyToken,*/ async (req, res) => {
+	await mixtapes.findByIdAndUpdate(req.body.mixtapeID, {$inc : {hearts : 1}}).then(async (result)=>{
+		if (!result){
+			return res.status(404).send("No result found for mixtape.")
+		}
+		// Disgusting
+		let string = `mixtapeHearts.${req.body.mixtapeID}`;
+		let param = {};
+		param[string] = false;
+		await profile.findByIdAndUpdate(req.body.userID, {$set : param}).then((result) => {
+			if (!result){
+				return res.status(404).send("No result found for profile.")
+			}
+			return res.status(200).send("Success.")
+		}).catch((error)=>{
+			console.log(error);
+			return res.status(500).send("Error in updating the profile.")
+		})
+	}).catch((error)=>{
+		console.log(error);
+		return res.status(500).send("Error in updating the mixtape.")
+	})
+})
 
 module.exports = router;
