@@ -158,7 +158,6 @@ router.get('/liked/uid/:uid', async (req, res) => {
 // Gets a list of mixtapes from the database based the search query, extremely simple implementation
 router.get('/search/:query', async (req, res) => {
 	await mixtapes.find({ name: {$regex: req.params.query, $options: "i"} }).sort({ views: -1 }).limit(20).then((mixtapes) => {
-		//console.log(mixtapes);
 		if (!mixtapes) {
 			return res.status(404).send("No mixtapes found.");
 		}
