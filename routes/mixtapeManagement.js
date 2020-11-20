@@ -36,7 +36,6 @@ router.get('/uid/:id', async (req, res) => {
 			return new Promise(async (resolve) => {
 				let songList = mixtape.songList;
 				mixtape['songList'] = [];
-				//console.log(songList)
 				let requests2 = songList.map(async (songID) => {
 					return new Promise(async (resolve) => {
 						await songs.findById(songID).then((songDB) => {
@@ -62,7 +61,6 @@ router.get('/uid/:id', async (req, res) => {
 					})
 				})
 				Promise.all(requests2, requests3).then((result) => {
-					//console.log(mixtape)
 					resolve(mixtape);
 				}).catch((error)=>{
 					console.log(error);
@@ -92,7 +90,6 @@ router.get('/popular', async (req, res) => {
 			return new Promise(async (resolve) => {
 				let songList = mixtape.songList;
 				mixtape['songList'] = [];
-				//console.log(songList)
 				let requests2 = songList.map(async (songID) => {
 					return new Promise(async (resolve) => {
 						await songs.findById(songID).then((songDB) => {
@@ -118,7 +115,6 @@ router.get('/popular', async (req, res) => {
 					})
 				})
 				Promise.all(requests2, requests3).then((result) => {
-					//console.log(mixtape)
 					resolve(mixtape);
 				}).catch((error)=>{
 					console.log(error);
@@ -136,6 +132,17 @@ router.get('/popular', async (req, res) => {
 		console.log(error)
 		return res.status(500).send("Error in DB.")
 	})
+})
+
+// Gets a list of mixtape IDs from the database that the user liked
+router.get('/likedIDs/uid/:uid', async (req, res) => {
+	await profile.findById(req.params.uid).then((result) => {
+		let likedMixtapes = result.mixtapeHearts.toJSON();
+		return res.status(200).send(likedMixtapes);
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("Error in profile DB.")
+	});
 })
 
 // Gets a list of mixtapes from the database that the user liked
@@ -157,7 +164,6 @@ router.get('/liked/uid/:uid', async (req, res) => {
 				return new Promise(async (resolve) => {
 					let songList = mixtape.songList;
 					mixtape['songList'] = [];
-					//console.log(songList)
 					let requests2 = songList.map(async (songID) => {
 						return new Promise(async (resolve) => {
 							await songs.findById(songID).then((songDB) => {
@@ -183,7 +189,6 @@ router.get('/liked/uid/:uid', async (req, res) => {
 						})
 					})
 					Promise.all(requests2, requests3).then((result) => {
-						//console.log(mixtape)
 						resolve(mixtape);
 					}).catch((error)=>{
 						console.log(error);
@@ -233,7 +238,6 @@ router.get('/search/:query', async (req, res) => {
 			});
 		});
 		Promise.all(requests).then((result) => {
-			//console.log(result);
 			return res.status(200).send(result);
 		}).catch((error) => {
 			console.log(error);
@@ -300,7 +304,6 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 		comments: req.body.comments,
 		match: req.body.match
 	}, { new: true }).then(async (result) => {
-		console.log(JSON.stringify(result.songList))
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the mixtape.");
 		}
@@ -405,7 +408,7 @@ router.post('/like', /*verifyToken,*/ async (req, res) => {
 // Furthermore, profile.mixtapeHearts is edited to reflect the like
 // Assumes that the body contains mixtapeID and userID
 router.post('/unlike', /*verifyToken,*/ async (req, res) => {
-	await mixtapes.findByIdAndUpdate(req.body.mixtapeID, { $inc: { hearts: 1 } }).then(async (result) => {
+	await mixtapes.findByIdAndUpdate(req.body.mixtapeID, { $inc: { hearts: -1 } }).then(async (result) => {
 		if (!result) {
 			return res.status(404).send("No result found for mixtape.")
 		}
@@ -433,6 +436,7 @@ router.post('/view', async (req, res) => {
 		if (!result) {
 			return res.status(404).send("No result found for mixtape.")
 		}
+		return res.status(200).send("Success!")
 	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("Error in updating the mixtape.")
