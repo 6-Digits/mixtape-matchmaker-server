@@ -14,7 +14,7 @@ const profiles = require('../models/profile');
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
 
-
+// http://localhost:42069/api/auth/login
 router.post('/login', async (req, res) => {
     await accounts.findOne({ email: req.body.email }, (err, user) => {
         if (err) {
@@ -38,11 +38,11 @@ router.post('/login', async (req, res) => {
     });
 
 });
-
+// http://localhost:42069/api/auth/logout
 router.get('/logout', async (req, res) => {
     res.status(200).send({ auth: false, token: null });
 });
-
+// http://localhost:42069/api/auth/register
 router.post('/register', async (req, res) => {
     console.log("registering users");
     let hashedPassword = bcrypt.hashSync(req.body.password, 8);
@@ -76,6 +76,7 @@ router.post('/register', async (req, res) => {
     })
 });
 
+// http://localhost:42069/api/auth/me
 router.get('/me', verifyToken, async (req, res, next) => {
     await accounts.findById(req.userId, { password: 0 },
         (err, user) => {

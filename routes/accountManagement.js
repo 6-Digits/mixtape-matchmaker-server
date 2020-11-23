@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user from the database
+// http://localhost:42069/api/account/id/:id
 router.get('/id/:id', async (req, res) => {
 	await accounts.findById(req.params.id, function (err, user) {
 		if (err) {
@@ -21,6 +22,7 @@ router.get('/id/:id', async (req, res) => {
 })
 
 // Updates a single user in the database
+// http://localhost:42069/api/account/id/:id
 router.post('/id/:id', /*verifyToken,*/ async (req, res) => {
 	//console.log(req.body)
 	await accounts.findOne({_id: req.params.id}, async (err, dbUser) => {

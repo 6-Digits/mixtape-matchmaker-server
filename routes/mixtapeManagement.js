@@ -15,6 +15,7 @@ const Promise = require('bluebird');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single mixtape from the database based on their unique mixtape id
+// http://localhost:42069/api/mixtape/id/:id
 router.get('/id/:id', async (req, res) => {
 	await mixtapes.findById(req.params.id, function (err, user) {
 		if (err) {
@@ -28,6 +29,7 @@ router.get('/id/:id', async (req, res) => {
 });
 
 // Gets a list of mixtapes from the database based on their owner
+// http://localhost:42069/api/mixtape/uid/:id
 router.get('/uid/:id', async (req, res) => {
 	await mixtapes.find({ owner: req.params.id }).then(async (mixtapes) => {
 		if (!mixtapes) {
@@ -74,6 +76,7 @@ router.get('/uid/:id', async (req, res) => {
 })
 
 // Gets a list of mixtapes from the database based their view count
+// http://localhost:42069/api/mixtape/popular
 router.get('/popular', async (req, res) => {
 	await mixtapes.find({ public: true }).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		if (!mixtapes) {
@@ -120,6 +123,7 @@ router.get('/popular', async (req, res) => {
 })
 
 // Gets a list of mixtapes from the database that the user liked
+// http://localhost:42069/api/mixtape/liked/uid/:uid
 router.get('/liked/uid/:uid', async (req, res) => {
 	await profile.findById(req.params.uid).then((result) => {
 		let likedMixtapeIDs = Array.from(result.mixtapeHearts.keys());
@@ -178,6 +182,7 @@ router.get('/liked/uid/:uid', async (req, res) => {
 })
 
 // Gets a list of mixtapes from the database based the search query, extremely simple implementation
+// http://localhost:42069/api/mixtape/search/:query
 router.get('/search/:query', async (req, res) => {
 	await mixtapes.find({ name: { $regex: req.params.query, $options: "i" } }).sort({ views: -1 }).limit(20).then((mixtapes) => {
 		if (!mixtapes) {
@@ -251,6 +256,7 @@ router.get('/viewMixtape/id/:id', async (req, res) => {
 });
 
 // Creates a mixtape in the database
+// http://localhost:42069/api/mixtape/createMixtape/uid/:uid
 router.post('/createMixtape/uid/:uid', /*verifyToken,*/ async (req, res) => {
 	await mixtapes.create({
 		owner: req.params.uid,
@@ -269,6 +275,7 @@ router.post('/createMixtape/uid/:uid', /*verifyToken,*/ async (req, res) => {
 });
 
 // Updates a mixtape in the database
+// http://localhost:42069/api/mixtape/updateMixtape/id/:id
 router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 	await mixtapes.findByIdAndUpdate(req.params.id, {
 		name: req.body.name,
@@ -289,6 +296,7 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 });
 // Assumes the req.body is in the same format as the song document in the DB.
 // If the song is already in the DB based on the videoId, the post doesn't add the song.
+// http://localhost:42069/api/mixtape/addSong
 router.post('/addSong', async (req, res) => {
 	await songs.findOne({ videoId: req.body.videoId }).then(async (result) => {
 		if (result) {
@@ -308,6 +316,7 @@ router.post('/addSong', async (req, res) => {
 })
 
 // Deletes a mixtape in the database
+// http://localhost:42069/api/mixtape/deleteMixtape/id/:id
 router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 	await mixtapes.findByIdAndDelete(req.params.id).then(async (result) => {
 		if (!result) {
@@ -322,6 +331,7 @@ router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 
 // Creates a comment for a specified mixtape in the database
 // Assumes that you update the commentIDList in the frontend
+// http://localhost:42069/api/mixtape/createComment
 router.post('/createComment', verifyToken, async (req, res) => {
 	await comments.create({
 		owner: req.body.id,
@@ -352,6 +362,7 @@ router.get('/getComments/id/:id', verifyToken, async (req, res) => {
 });
 
 // Gets a list of mixtape IDs from the database that the user liked
+// http://localhost:42069/api/mixtape/likedIDs/uid/:uid
 router.get('/likedIDs/uid/:uid', async (req, res) => {
 	await profile.findById(req.params.uid).then((result) => {
 		let likedMixtapes = result.mixtapeHearts.toJSON();
@@ -365,6 +376,7 @@ router.get('/likedIDs/uid/:uid', async (req, res) => {
 // When a user hearts a mixtape, that mixtape's heart amount is incremented by 1 
 // Furthermore, profile.mixtapeHearts is edited to reflect the like
 // Assumes that the body contains mixtapeID and userID
+// http://localhost:42069/api/mixtape/like
 router.post('/like', /*verifyToken,*/ async (req, res) => {
 	await profile.findById(req.body.userID).then(async (profileDB) => {
 		if (!profileDB) {
@@ -403,6 +415,7 @@ router.post('/like', /*verifyToken,*/ async (req, res) => {
 // When a user hearts a mixtape, that mixtape's heart amount is incremented by 1 
 // Furthermore, profile.mixtapeHearts is edited to reflect the like
 // Assumes that the body contains mixtapeID and userID
+// http://localhost:42069/api/mixtape/unlike
 router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 	await profile.findById(req.body.userID).then(async (profileDB) => {
 		if (!profileDB) {
@@ -438,6 +451,7 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 	})
 })
 
+// http://localhost:42069/api/mixtape/view
 router.post('/view', async (req, res) => {
 	await profile.findById(req.body.userID).then(async (profileDB) => {
 		if (!profileDB) {

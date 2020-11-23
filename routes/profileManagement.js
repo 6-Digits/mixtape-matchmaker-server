@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference JSON from the database
+// http://localhost:42069/api/profile/id/:id
 router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	//console.log(req.params.id);
 	await profiles.findById(req.params.id).then((user) => {
@@ -24,6 +25,7 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 })
 
 // Gets a single user-preference JSON from the database
+// http://localhost:42069/api/profile/preference/id/:id
 router.get('preference/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	await profiles.findById(req.params.id, function (err, user) {
 		if (err) {
@@ -39,6 +41,7 @@ router.get('preference/id/:id', /*VerifyToken(),*/ async (req, res) => {
 // Updates a single user-preference in the database
 // For the frontend, note that you would have to make two calls for the settings page
 // First to update the profile, and Second to update the account settings if needed
+// http://localhost:42069/api/profile/id/:id
 router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	let user1;
 	await accounts.findById(req.params.id).then(async (result) => {
@@ -67,6 +70,7 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 
 // Updates both account and profile settings at the same time.
 // Should use this instead of the depreciated version above.
+// http://localhost:42069/api/profile/uid/:id
 router.post('/uid/:id', async (req, res) => {
 	// Checks id every field is populated
 	if (req.body.name && req.body.userName && req.body.dob && req.body.gender
@@ -118,7 +122,8 @@ router.post('/uid/:id', async (req, res) => {
 })
 
 // Gets all notifications based on the user id
-router.get('/notifications/id/:id', async (req, res) => {
+// http://localhost:42069/api/profile/notificatons/nid/:nid
+router.get('/notifications/nid/:nid', async (req, res) => {
 	await notifications.find({ user: req.params.id }).then((result) => {
 		if (!result) {
 			return res.status(404).send("No user found.");
@@ -132,7 +137,8 @@ router.get('/notifications/id/:id', async (req, res) => {
 
 // Gets all notifications based on the notification id 
 // Note that calling this route sends back the delete operation timestamped
-router.post('/notifications/nid/:id', async (req, res) => {
+// http://localhost:42069/api/profile/notificatons/nid/:nid
+router.post('/notifications/nid/:nid', async (req, res) => {
 	await notifications.deleteOne({ _id: req.params.id }).then((result) => {
 		if (!result) {
 			return res.status(404).send("No user found.");
