@@ -122,9 +122,9 @@ router.post('/uid/:id', async (req, res) => {
 })
 
 // Gets all notifications based on the user id
-// http://localhost:42069/api/profile/notificatons/nid/:nid
-router.get('/notifications/nid/:nid', async (req, res) => {
-	await notifications.find({ user: req.params.id }).then((result) => {
+// http://localhost:42069/api/profile/notificatons/uid/:uid
+router.get('/notifications/uid/:uid', async (req, res) => {
+	await notifications.find({ user: req.params.uid }).then((result) => {
 		if (!result) {
 			return res.status(404).send("No user found.");
 		}
@@ -135,8 +135,7 @@ router.get('/notifications/nid/:nid', async (req, res) => {
 	})
 })
 
-// Gets all notifications based on the notification id 
-// Note that calling this route sends back the delete operation timestamped
+// Note that calling this route sends back the delete operation
 // http://localhost:42069/api/profile/notificatons/nid/:nid
 router.post('/notifications/nid/:nid', async (req, res) => {
 	await notifications.deleteOne({ _id: req.params.id }).then((result) => {
