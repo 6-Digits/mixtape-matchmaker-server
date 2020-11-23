@@ -416,15 +416,38 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 	})
 })
 
-router.post('/view', async (req, res) => {
-	await mixtapes.findByIdAndUpdate(req.body.mixtapeID, { $inc: { views: 1 } }).then(async (result) => {
-		if (!result) {
-			return res.status(404).send("No result found for mixtape.")
+router.get('/view', async (req, res) => {
+	await profile.findById(req.body.userID).then(async (profileDB) => {
+		if (!profileDB){
+			return res.status(404).send("No result for profile.")
 		}
-		return res.status(200).send("Success!")
-	}).catch((error) => {
-		console.log(error);
-		return res.status(500).send("Error in updating the mixtape.")
+		let mixtapeViews = profileDB.mixtapeViews
+		let viewedMixtapeIDs = Array.from(profileDB.mixtapeViews.keys());
+		// Disgusting
+		let string = `mixtapeViews.${req.body.mixtapeID}`;
+		let param = {};
+		param[string] = Date.now();
+		// There is no mixtapeID in the map OR
+		// It's been an hour since they have viewed the mixtape
+		if (!(profileDB.mixtapeViews.has(req.body.mixtapeID)) || Date.now() - mixtapeViews[req.body.mixtapeID] > 3600000){
+			console.log(mixtapeViews);
+			await profile.findByIdAndUpdate(req.body.userID, { $set : param}).then(async (result)=>{
+				await mixtapes.findByIdAndUpdate(req.body.mixtapeID, { $inc: { views: 1 } }).then(async (result) => {
+					if (!result) {
+						return res.status(404).send("No result found for mixtape.")
+					}
+					return res.status(200).send("Success!")
+				}).catch((error) => {
+					console.log(error);
+					return res.status(500).send("Error in updating the mixtape.")
+				})
+			}).catch((error)=>{
+				console.log(error);
+				return res.status(500).send("Error in profile database.")
+			})
+		}else {
+			return res.status(200).send("Already seen the mixtape today.")
+		}
 	})
 })
 

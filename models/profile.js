@@ -33,6 +33,10 @@ let profileSchema = new Schema({
         type: Map,
         default: {}
     },
+    mixtapeViews: {
+        type: Map,
+        default: {}
+    },
     imgSrc: {
         type: String,
         default: ""
