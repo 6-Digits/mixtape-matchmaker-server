@@ -5,7 +5,6 @@ const preferences = require('../models/preference');
 const chats = require('../models/chat');
 const messages = require('../models/message');
 const VerifyToken = require('../authentication/verifyToken');
-
 const Promise = require('bluebird');
 const mixtape = require('../models/mixtape');
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -106,6 +105,33 @@ router.get('/chat/uid/:uid', async (req, res) => {
 	})
 })
 
+// Gets a single user-preference JSON from the database
+// http://localhost:42069/api/match/preference/uid/:uid
+router.get('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
+	await preferences.findById(req.params.uid, function (err, user) {
+		if (err) {
+			return res.status(500).send("There was a problem getting data from the DB.");
+		} else if (!user) {
+			return res.status(404).send("No user found.");
+		} else {
+			res.status(200).send(user);
+		}
+	});
+})
+
+// Updates a single user=preference in the database
+// http://localhost:42069/api/match/preference/uid/:uid
+router.post('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
+	await preferences.findByIdAndUpdate(req.params.uid, req.body, { new : true }).then((preferenceDB) => {
+		if (!preferenceDB){
+			return res.status(404).send("No preference for this user found.")
+		}
+		return res.status(200).send(preferenceDB)
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in updating the preferences.")
+	})
+})
 
 // Gets an entire list of matched users
 router.get('/matchList', /*VerifyToken(),*/ async (req, res) => {

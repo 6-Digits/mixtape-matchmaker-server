@@ -24,19 +24,6 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	});
 })
 
-// Gets a single user-preference JSON from the database
-// http://localhost:42069/api/profile/preference/id/:id
-router.get('preference/id/:id', /*VerifyToken(),*/ async (req, res) => {
-	await profiles.findById(req.params.id, function (err, user) {
-		if (err) {
-			return res.status(500).send("There was a problem getting data from the DB.");
-		} else if (!user) {
-			return res.status(404).send("No user found.");
-		} else {
-			res.status(200).send(user);
-		}
-	});
-})
 // Depreciated
 // Updates a single user-preference in the database
 // For the frontend, note that you would have to make two calls for the settings page
