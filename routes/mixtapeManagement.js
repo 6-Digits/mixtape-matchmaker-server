@@ -138,6 +138,12 @@ router.get('/liked/uid/:uid', async (req, res) => {
 			})
 		})
 		Promise.all(requests).then((mixtapeList) => {
+			mixtapeList = mixtapeList.filter(mixtape =>{
+				return mixtape != null;
+			})
+			if (!mixtapeList){
+				return res.status(404).send("No liked mixtape for this user.")
+			}
 			let requests = mixtapeList.map((mixtape) => {
 				return new Promise(async (resolve) => {
 					let songList = mixtape.songList;

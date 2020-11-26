@@ -13,6 +13,7 @@ const profiles = require('../models/profile');
 
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
+const mixtape = require('../models/mixtape');
 
 // http://localhost:42069/api/auth/login
 router.post('/login', async (req, res) => {
@@ -47,6 +48,7 @@ router.post('/register', async (req, res) => {
     console.log("registering users");
     let hashedPassword = bcrypt.hashSync(req.body.password, 8);
     let token = null;
+    console.log("Creating account.")
     await accounts.create({
         email: req.body.email,
         password: hashedPassword
@@ -58,14 +60,23 @@ router.post('/register', async (req, res) => {
         });
         let name = `${req.body.firstName} ${req.body.lastName}`;
         //console.log(req.body);
+        console.log("Creating profile.")
         await profiles.create({
             _id: result._id,
             name: name,
             userName: name,
             gender: req.body.gender,
             dob: req.body.dob,
-        }).then((result)=>{
-            return res.status(200).send({ auth: true, token: token, id: result._id });
+        }).then(async (result)=>{
+            await mixtape.create({
+                owner : result._id,
+                match : true
+            }).then((matchMixtape)=>{
+                return res.status(200).send({ auth: true, token: token, id: result._id });
+            }).catch((error)=>{
+                console.log(error)
+                return res.status(500).send("Error in creating a match mixtape")
+            })
         }).catch((error) => {
             console.log(error)
             return res.status(500).send("Error creating profile in database")

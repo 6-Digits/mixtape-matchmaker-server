@@ -7,6 +7,7 @@ const messages = require('../models/message');
 const VerifyToken = require('../authentication/verifyToken');
 
 const Promise = require('bluebird');
+const mixtape = require('../models/mixtape');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference from the database
@@ -34,6 +35,38 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		}else{
 			res.status(200).send(user);
 		}
+	});
+})
+
+// Gets the single match-mixtape based on the user's id
+// http://localhost:42069/api/match/mixtape/uid/:uid
+router.get('/mixtape/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
+	await mixtape.findOne({owner : req.params.uid, match: true}).then((matchMixtape)=>{
+		if (!matchMixtape){
+			return res.status(404).send("No match mixtape found.")
+		}
+		return res.status(200).send(matchMixtape)
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in getting match mixtape.")
+	})
+})
+
+// Sets the match-mixtape based on the mixtape id
+// http://localhost:42069/api/match/mixtape/mid/:mid
+router.post('/mixtape/mid/:mid', /*VerifyToken(),*/ async (req, res) => {
+	await mixtapes.findByIdAndUpdate(req.params.mid, {
+		name: req.body.name,
+		description: req.body.description,
+		songList: req.body.songList,
+	}, { new: true }).then(async (result) => {
+		if (!result) {
+			return res.status(404).send("There is a problem with creating the mixtape.");
+		}
+		return res.status(200).send(result);
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with the database.");
 	});
 })
 
