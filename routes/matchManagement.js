@@ -122,6 +122,9 @@ router.get('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 // Updates a single user=preference in the database
 // http://localhost:42069/api/match/preference/uid/:uid
 router.post('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
+	if (req.body.ageLower < 18){
+		return res.status(500).send("FBI OPEN UP!!!")
+	}
 	await preferences.findByIdAndUpdate(req.params.uid, req.body, { new : true }).then((preferenceDB) => {
 		if (!preferenceDB){
 			return res.status(404).send("No preference for this user found.")

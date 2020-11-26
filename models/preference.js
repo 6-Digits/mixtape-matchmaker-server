@@ -9,12 +9,12 @@ let preferenceSchema = new Schema({
     ageUpper: {
         type: Number,
         required: true,
-        default: 18
+        default: 2147483647
     },
     ageLower: {
         type: Number,
         required: true,
-        default: 2147483647
+        default: 18
     },
     location: {
         type: String,

@@ -13,7 +13,8 @@ const profiles = require('../models/profile');
 
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
-const mixtape = require('../models/mixtape');
+const mixtapes = require('../models/mixtape');
+const preferences = require('../models/preference');
 
 // http://localhost:42069/api/auth/login
 router.post('/login', async (req, res) => {
@@ -68,11 +69,16 @@ router.post('/register', async (req, res) => {
             gender: req.body.gender,
             dob: req.body.dob,
         }).then(async (result)=>{
-            await mixtape.create({
+            await mixtapes.create({
                 owner : result._id,
                 match : true
-            }).then((matchMixtape)=>{
-                return res.status(200).send({ auth: true, token: token, id: result._id });
+            }).then(async (matchMixtape)=>{
+                await preferences.create({ owner : result._id}).then((preferenceDB)=>{
+                    return res.status(200).send({ auth: true, token: token, id: result._id });
+                }).catch((error)=>{
+                    console.log(error)
+                    return res.status(500).send("Error in creating a preferences")
+                })
             }).catch((error)=>{
                 console.log(error)
                 return res.status(500).send("Error in creating a match mixtape")
