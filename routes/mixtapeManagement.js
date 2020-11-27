@@ -52,7 +52,7 @@ router.get('/uid/:id', async (req, res) => {
 				let commentList = mixtape.comments;
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
-					await songs.findById(commentID).then((commentDB) => {
+					await comments.findById(commentID).then((commentDB) => {
 						mixtape['comments'].push(commentDB)
 					}).catch((error) => {
 						console.log(error);
@@ -99,8 +99,16 @@ router.get('/popular', async (req, res) => {
 				let commentList = mixtape.comments;
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
-					await songs.findById(commentID).then((commentDB) => {
-						mixtape['comments'].push(commentDB)
+					await comments.findById(commentID).then( async (commentDB) => {
+						let user = await profile.findById(commentDB['user']);
+						let comment = {
+							_id: commentDB['_id'],
+							text: commentDB['text'],
+							user: commentDB['user'],
+							name: user['userName'],
+							picture: user['imgSrc'],
+						}
+						mixtape['comments'].push(comment);
 					}).catch((error) => {
 						console.log(error);
 						return res.status(500).send("DB error")
@@ -154,8 +162,16 @@ router.get('/liked/uid/:uid', async (req, res) => {
 					let commentList = mixtape.comments;
 					mixtape['comments'] = [];
 					let commentPromise = Promise.each(commentList, async (commentID) => {
-						await songs.findById(commentID).then((commentDB) => {
-							mixtape['comments'].push(commentDB)
+						await comments.findById(commentID).then( async (commentDB) => {
+							let user = await profile.findById(commentDB['user']);
+							let comment = {
+								_id: commentDB['_id'],
+								text: commentDB['text'],
+								user: commentDB['user'],
+								name: user['userName'],
+								picture: user['imgSrc'],
+							}
+							mixtape['comments'].push(comment);
 						}).catch((error) => {
 							console.log(error);
 							return res.status(500).send("DB error")
@@ -205,8 +221,16 @@ router.get('/search/:query', async (req, res) => {
 				let commentList = mixtape.comments;
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
-					await songs.findById(commentID).then((commentDB) => {
-						mixtape['comments'].push(commentDB)
+					await comments.findById(commentID).then( async (commentDB) => {
+						let user = await profile.findById(commentDB['user']);
+						let comment = {
+							_id: commentDB['_id'],
+							text: commentDB['text'],
+							user: commentDB['user'],
+							name: user['userName'],
+							picture: user['imgSrc'],
+						}
+						mixtape['comments'].push(comment);
 					}).catch((error) => {
 						console.log(error);
 						return res.status(500).send("DB error")
@@ -295,6 +319,23 @@ router.post('/updateMixtape/id/:id', /*verifyToken,*/ async (req, res) => {
 		return res.status(500).send("There is a problem with the database.");
 	});
 });
+
+// Updates a mixtape in the database
+// http://localhost:42069/api/mixtape/updateMixtapeComments/id/:id
+router.post('/updateMixtapeComments/id/:id', /*verifyToken,*/ async (req, res) => {
+	await mixtapes.findByIdAndUpdate(req.params.id, {
+		comments: req.body.comments,
+	}, { new: true }).then(async (result) => {
+		if (!result) {
+			return res.status(404).send("There is a problem with creating the mixtape.");
+		}
+		return res.status(200).send(result);
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with the database.");
+	});
+});
+
 // Assumes the req.body is in the same format as the song document in the DB.
 // If the song is already in the DB based on the videoId, the post doesn't add the song.
 // http://localhost:42069/api/mixtape/addSong
@@ -362,14 +403,21 @@ router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 // http://localhost:42069/api/mixtape/createComment
 router.post('/createComment', verifyToken, async (req, res) => {
 	await comments.create({
-		owner: req.body.id,
-		mixtape: req.body.mixtape,
+		user: req.body.user,
 		text: req.body.text
 	}).then(async (result) => {
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the comment.");
 		}
-		return res.status(200).send(result);
+		let user = await profile.findById(req.body.user);
+		let comment = {
+			_id: result['_id'],
+			text: result['text'],
+			user: result['user'],
+			name: user['userName'],
+			picture: user['imgSrc'],
+		}
+		return res.status(200).send(comment);
 	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("There is a problem with the database.");
