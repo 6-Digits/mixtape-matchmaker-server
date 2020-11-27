@@ -1,7 +1,7 @@
-const search = require('./search.js')
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
+const axios = require('axios');
 const accounts = require('../models/account');
 const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
@@ -9,8 +9,9 @@ const comments = require('../models/comment');
 const verifyToken = require('../authentication/verifyToken');
 const bcrypt = require('bcryptjs');
 const profile = require('../models/profile.js');
-const song = require('../models/song');
 const Promise = require('bluebird');
+
+const api = 'http://localhost:42069/api';
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -138,12 +139,6 @@ router.get('/liked/uid/:uid', async (req, res) => {
 			})
 		})
 		Promise.all(requests).then((mixtapeList) => {
-			mixtapeList = mixtapeList.filter(mixtape =>{
-				return mixtape != null;
-			})
-			if (!mixtapeList){
-				return res.status(404).send("No liked mixtape for this user.")
-			}
 			let requests = mixtapeList.map((mixtape) => {
 				return new Promise(async (resolve) => {
 					let songList = mixtape.songList;
@@ -310,6 +305,33 @@ router.post('/addSong', async (req, res) => {
 		} else {
 			await songs.create(req.body).then((result) => {
 				return res.status(200).send(result._id);
+			}).catch((error) => {
+				console.log(error);
+				return res.status(500).send("Error in creating song.")
+			})
+		}
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("Error in finding song.");
+	})
+})
+
+// creates song if not in database
+// return song collection
+// http://localhost:42069/api/mixtape/createSong/:videoId
+router.post('/createSong/:videoId', async (req, res) => {
+	await songs.findOne({ videoId: req.params.videoId }).then(async (result) => {
+		if (result) {
+			return res.status(200).send(result);
+		} else {
+			let result = await axios.get(`${api}/youtube/video/${req.params.videoId}`).catch((error => {
+				console.log(error);
+				return res.status(500).send("Error in creating song.");
+			}));
+			let song = result.data;
+			
+			await songs.create(song).then((result) => {
+				return res.status(200).send(result);
 			}).catch((error) => {
 				console.log(error);
 				return res.status(500).send("Error in creating song.")

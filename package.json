@@ -25,6 +25,7 @@
     "nodemon": "^2.0.6",
     "passport": "^0.4.1",
     "passport-local-mongoose": "^6.0.1",
+    "scrape-youtube": "^2.0.2",
     "socket.io": "^2.0.1"
   }
 }
