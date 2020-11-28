@@ -104,6 +104,7 @@ router.get('/popular', async (req, res) => {
 						let comment = {
 							_id: commentDB['_id'],
 							text: commentDB['text'],
+							date: commentDB['date'],
 							user: commentDB['user'],
 							name: user['userName'],
 							picture: user['imgSrc'],
@@ -167,6 +168,7 @@ router.get('/liked/uid/:uid', async (req, res) => {
 							let comment = {
 								_id: commentDB['_id'],
 								text: commentDB['text'],
+								date: commentDB['date'],
 								user: commentDB['user'],
 								name: user['userName'],
 								picture: user['imgSrc'],
@@ -226,6 +228,7 @@ router.get('/search/:query', async (req, res) => {
 						let comment = {
 							_id: commentDB['_id'],
 							text: commentDB['text'],
+							date: commentDB['date'],
 							user: commentDB['user'],
 							name: user['userName'],
 							picture: user['imgSrc'],
