@@ -4,7 +4,7 @@ require('dotenv').config()
 const express = require('express');
 const app = require('express')();
 const cors = require('cors');
-
+const test = require('./asyncTest')
 app.use(cors());
 
 app.use(express.static(__dirname));
@@ -28,7 +28,6 @@ app.listen(port, () => {
 	console.log(`Server running at port: ${port}`);
 	console.log(`MongoDB URI on: ${mongoUri}`);
 });
-
 // create home page route
 app.use("/", require("./routes/index"));
 
