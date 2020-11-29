@@ -416,8 +416,8 @@ router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 
 // Creates a comment for a specified mixtape in the database
 // Assumes that you update the commentIDList in the frontend
-// http://localhost:42069/api/mixtape/createComment
-router.post('/createComment', verifyToken, async (req, res) => {
+// http://localhost:42069/api/mixtape/createComment/mid/:mid
+router.post('/createComment/mid/:mid', /*verifyToken,*/ async (req, res) => {
 	await comments.create({
 		user: req.body.user,
 		text: req.body.text
@@ -425,6 +425,10 @@ router.post('/createComment', verifyToken, async (req, res) => {
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the comment.");
 		}
+		await mixtapes.findByIdAndUpdate(req.params.mid, { $push: { comments: { $each: [result], $position: 0}}}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("Error in updating the mixtape comment list.")
+		})
 		let user = await profile.findById(req.body.user);
 		let comment = {
 			_id: result['_id'],
