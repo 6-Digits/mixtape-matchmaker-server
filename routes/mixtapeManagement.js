@@ -53,7 +53,16 @@ router.get('/uid/:id', async (req, res) => {
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
 					await comments.findById(commentID).then((commentDB) => {
-						mixtape['comments'].push(commentDB)
+						let user = await profile.findById(commentDB['user']);
+						let comment = {
+							_id: commentDB['_id'],
+							text: commentDB['text'],
+							date: commentDB['date'],
+							user: commentDB['user'],
+							name: user['userName'],
+							picture: user['imgSrc'],
+						};
+						mixtape['comments'].push(comment);
 					}).catch((error) => {
 						console.log(error);
 						return res.status(500).send("DB error")
@@ -416,6 +425,7 @@ router.post('/createComment', verifyToken, async (req, res) => {
 		let comment = {
 			_id: result['_id'],
 			text: result['text'],
+			date: result['date'],
 			user: result['user'],
 			name: user['userName'],
 			picture: user['imgSrc'],
