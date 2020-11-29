@@ -1,13 +1,13 @@
 
-const bigFunction = () => {
-    console.log("YEAH");
+// const bigFunction = () => {
+//     console.log("YEAH");
 
 
 
-}
+// }
 
 
-setInterval(bigFunction, 3000);
+// setInterval(bigFunction, 3000);
 
 
 /*const timeout = 1000;
