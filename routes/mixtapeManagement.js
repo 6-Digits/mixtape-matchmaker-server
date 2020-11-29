@@ -10,6 +10,7 @@ const verifyToken = require('../authentication/verifyToken');
 const bcrypt = require('bcryptjs');
 const profile = require('../models/profile.js');
 const Promise = require('bluebird');
+const mixtape = require('../models/mixtape');
 
 const api = 'http://localhost:42069/api';
 
@@ -68,7 +69,7 @@ router.get('/uid/:id', async (req, res) => {
 						return res.status(500).send("DB error")
 					})
 				})
-				Promise.all(songPromise, commentPromise).then(() => {
+				Promise.all([songPromise, commentPromise]).then(() => {
 					resolve();
 				})
 			})
@@ -104,7 +105,8 @@ router.get('/popular', async (req, res) => {
 						console.log(error);
 						return res.status(500).send("DB error")
 					})
-				})
+				});
+				
 				let commentList = mixtape.comments;
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
@@ -122,11 +124,13 @@ router.get('/popular', async (req, res) => {
 					}).catch((error) => {
 						console.log(error);
 						return res.status(500).send("DB error")
-					})
-				})
-				Promise.all(songPromise, commentPromise).then(() => {
+					});
+				});
+				
+				Promise.all([songPromise, commentPromise]).then(() => {
 					resolve();
-				})
+				});
+				
 			})
 		})
 		Promise.all(requests).then(() => {
@@ -188,7 +192,7 @@ router.get('/liked/uid/:uid', async (req, res) => {
 							return res.status(500).send("DB error")
 						})
 					})
-					Promise.all(songPromise, commentPromise).then(() => {
+					Promise.all([songPromise, commentPromise]).then(() => {
 						resolve();
 					})
 				})
@@ -248,7 +252,7 @@ router.get('/search/:query', async (req, res) => {
 						return res.status(500).send("DB error")
 					})
 				})
-				Promise.all(songPromise, commentPromise).then(() => {
+				Promise.all([songPromise, commentPromise]).then(() => {
 					resolve();
 				})
 			})
@@ -494,7 +498,9 @@ router.post('/like', /*verifyToken,*/ async (req, res) => {
 				return res.status(500).send("Error in updating the mixtape.")
 			})
 		}
-		return res.status(200).send("Already liked the mixtape")
+		else {
+			return res.status(200).send("Already liked the mixtape")
+		}
 	}).catch((error) => {
 		console.log(error)
 		return res.status(500).send("Error in profile DB.")
@@ -533,7 +539,9 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 				return res.status(500).send("Error in updating the mixtape.")
 			})
 		}
-		return res.status(200).send("Already unliked the mixtape.")
+		else {
+			return res.status(200).send("Already unliked the mixtape.")
+		}
 	}).catch((error) => {
 		console.log(error)
 		return res.status(500).send("Error in profile DB.")
