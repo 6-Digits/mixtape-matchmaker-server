@@ -425,7 +425,7 @@ router.post('/createComment/mid/:mid', /*verifyToken,*/ async (req, res) => {
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the comment.");
 		}
-		await mixtapes.findByIdAndUpdate(req.params.mid, { $push: { comments: { $each: [result], $position: 0}}}).catch((error)=>{
+		await mixtapes.findByIdAndUpdate(req.params.mid, { $push: { comments: { $each: [result._id], $position: 0}}}).catch((error)=>{
 			console.log(error)
 			return res.status(500).send("Error in updating the mixtape comment list.")
 		})
