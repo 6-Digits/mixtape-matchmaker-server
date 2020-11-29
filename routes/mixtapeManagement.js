@@ -52,7 +52,7 @@ router.get('/uid/:id', async (req, res) => {
 				let commentList = mixtape.comments;
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
-					await comments.findById(commentID).then((commentDB) => {
+					await comments.findById(commentID).then(async (commentDB) => {
 						let user = await profile.findById(commentDB['user']);
 						let comment = {
 							_id: commentDB['_id'],

@@ -4,7 +4,7 @@ require('dotenv').config()
 const express = require('express');
 const app = require('express')();
 const cors = require('cors');
-const test = require('./asyncTest')
+//const test = require('./asyncTest')
 app.use(cors());
 
 app.use(express.static(__dirname));
