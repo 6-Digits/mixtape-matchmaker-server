@@ -62,24 +62,25 @@ router.post('/register', async (req, res) => {
         let name = `${req.body.firstName} ${req.body.lastName}`;
         //console.log(req.body);
         console.log("Creating profile.")
-        await profiles.create({
-            _id: result._id,
-            name: name,
-            userName: name,
-            gender: req.body.gender,
-            dob: req.body.dob,
-        }).then(async (result)=>{
-            await mixtapes.create({
-                owner : result._id,
-                match : true
-            }).then(async (matchMixtape)=>{
-                await preferences.create({ owner : result._id}).then((preferenceDB)=>{
+        await mixtapes.create({
+            owner: result._id,
+            match: true
+        }).then(async (matchMixtape) => {
+            await profiles.create({
+                _id: result._id,
+                name: name,
+                userName: name,
+                gender: req.body.gender,
+                dob: req.body.dob,
+                matchPlaylist: matchMixtape._id
+            }).then(async (result) => {
+                await preferences.create({ owner: result._id }).then((preferenceDB) => {
                     return res.status(200).send({ auth: true, token: token, id: result._id });
-                }).catch((error)=>{
+                }).catch((error) => {
                     console.log(error)
                     return res.status(500).send("Error in creating a preferences")
                 })
-            }).catch((error)=>{
+            }).catch((error) => {
                 console.log(error)
                 return res.status(500).send("Error in creating a match mixtape")
             })
@@ -113,14 +114,14 @@ router.post('/resetPassword', async (req, res) => {
     }
     let password = process.env.RESET_PASSWORD;
     let hashedPassword = bcrypt.hashSync(password, 8);
-    
-    await accounts.findOneAndUpdate({ email: req.body.email }, 
-        { password: hashedPassword }, 
+
+    await accounts.findOneAndUpdate({ email: req.body.email },
+        { password: hashedPassword },
         (err, user) => {
             if (err || !user) {
                 return res.status(404).send('No user found.');
             }
-            
+
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
@@ -140,7 +141,7 @@ router.post('/resetPassword', async (req, res) => {
                 }
                 res.status(200).send('password reset, email sent');
             })
-    });
+        });
 })
 
 module.exports = router;

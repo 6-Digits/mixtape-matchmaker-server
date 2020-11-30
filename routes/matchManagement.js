@@ -7,7 +7,7 @@ const profiles = require('../models/profile');
 const messages = require('../models/message');
 const VerifyToken = require('../authentication/verifyToken');
 const Promise = require('bluebird');
-const mixtape = require('../models/mixtape');
+const mixtapes = require('../models/mixtape');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference from the database
@@ -41,7 +41,7 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 // Gets the single match-mixtape based on the user's id
 // http://localhost:42069/api/match/mixtape/uid/:uid
 router.get('/mixtape/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
-	await mixtape.findOne({owner : req.params.uid, match: true}).then((matchMixtape)=>{
+	await mixtapes.findOne({owner : req.params.uid, match: true}).then((matchMixtape)=>{
 		if (!matchMixtape){
 			return res.status(404).send("No match mixtape found.")
 		}
@@ -104,7 +104,7 @@ router.get('/chat/uid/:uid', async (req, res) => {
 			})
 		})
 		Promise.all(requests).then(() => {
-			console.log(chatList)
+			//console.log(chatList)
 			return res.status(200).send(chatList);
 		}).catch((error) => {
 			console.log(error);
@@ -150,6 +150,42 @@ router.post('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 // Gets an entire list of matched users
 router.get('/matchList', /*VerifyToken(),*/ async (req, res) => {
     res.status(404).send("To be implemented")
+})
+
+// Gets an entire list of possible matches for the user
+router.get('/compatible/uid/:uid', async (req, res) => {
+	// Restrictions in the possible matches to be implemented later
+	await profiles.find({}).then((profileList)=>{
+		if (!profileList){
+			return res.status(404).send("No compatible profile found.")
+		}
+		profileList = JSON.parse(JSON.stringify(profileList));
+		let requests = profileList.map((profile) => {
+			return new Promise(async (resolve) => {
+				await mixtapes.findOne({_id: profile.matchPlaylist, match : true}).then((mixtape)=>{
+					console.log(mixtape)
+					profile['matchPlaylist'] = mixtape;
+					//profile['matchPlaylist'] = mixtape;
+					console.log(profile)
+				}).catch((error)=>{
+					console.log(error)
+				})
+				resolve()
+			}).catch((error)=>{
+				console.log(error);
+			})
+		})
+		Promise.all(requests).then(() => {
+			//console.log(profileList)
+			return res.status(200).send(profileList);
+		}).catch((error) => {
+			console.log(error);
+			return res.status(500).send("Promise error, good luck.")
+		})
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("Profile DB error.")
+	})
 })
 
 // TODO: Actual Matching Algorithmn

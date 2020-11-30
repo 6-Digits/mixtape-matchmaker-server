@@ -43,6 +43,7 @@ let profileSchema = new Schema({
     },
     matchPlaylist: {
         type: Schema.Types.ObjectId,
+        required: true
     }
 })
 
