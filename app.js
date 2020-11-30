@@ -1,10 +1,7 @@
-// load .env variables
 require('dotenv').config()
-// create express app
 const express = require('express');
-const app = require('express')();
+const app = express();
 const cors = require('cors');
-//const test = require('./asyncTest')
 app.use(cors());
 
 app.use(express.static(__dirname));
@@ -22,8 +19,11 @@ app.use(expressSession);
 // Chat
 const chat = require('./chatServer');
 
+// match script
+const match = require('./match');
+
 // start server on port 42049
-const port = 42069;
+const port = process.env.PORT;
 app.listen(port, () => {
 	console.log(`Server running at port: ${port}`);
 	console.log(`MongoDB URI on: ${mongoUri}`);
