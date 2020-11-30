@@ -2,38 +2,59 @@ require('dotenv').config()
 const prelinks = require('./models/prelink');
 const links = require('./models/link');
 
-const delay = 10000;
+const delay = 60000;
 
 async function createLinks() {
-	let d = new Date();
-	let t = d.toUTCString();
-	console.log(t);
-	
-	let results = await prelinks.aggregate([
-		{
-			$lookup: {
-				from: 'prelinks',
-				localField: 'liker',
-				foreignField: 'user',
-				as: 'linkInfo'
-			}
-		},
-		{
-			$replaceRoot: {
-				newRoot: {
-					$mergeObjects: [ { $arrayElemAt: [ "$linkInfo", 0 ] }, "$ROOT" ]
+	let matches;
+	try {
+		matches = await prelinks.aggregate([
+			{
+				$lookup: {
+					from: 'prelinks',
+					localField: 'liker',
+					foreignField: 'user',
+					as: 'linkInfo'
+				}
+			},
+			{
+				$replaceRoot: {
+					newRoot: {
+						$mergeObjects: [ { $arrayElemAt: [ "$linkInfo", 0 ] }, "$ROOT" ]
+					}
+				}
+			},
+			{
+				$group: {
+					_id: '$_id',
+					'user1': { $first: '$liker' },
+					'user2': { $last: '$user' },
 				}
 			}
-		},
-		{
-			$group: {
-				_id: '$_id',
-				'user1': { $first: '$liker' },
-				'user2': { $last: '$user' }
-			}
-		}
-	]);
-	console.log(results);
+		]);
+	}
+	catch (exception) {
+		matches = {};
+	}
+	
+	if (matches.length > 1) {
+		let set = new Set();
+		matches.forEach(async (match) => {
+			let user1 = match['user1'];
+			let user2 = match['user2'];
+			if (!set.has([user1, user2].toString()) && !set.has([user2, user1].toString())) {
+				set.add([user1, user2].toString());
+				await links.create({
+					user1: user1,
+					user2: user2
+				}).catch((error) => {
+					console.log(error);
+				})
+			};
+			await prelinks.deleteOne( { _id: res['_id'] } ).catch((error) => {
+				console.log(error);
+			})
+		});
+	}
 }
 
 setTimeout(async function timer() {
