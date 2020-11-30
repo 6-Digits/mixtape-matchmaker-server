@@ -77,6 +77,7 @@ router.get('/chat/uid/:uid', async (req, res) => {
 		if (!chatList){
 			return res.status(404).send("No chat found.")
 		}
+		chatList = JSON.parse(JSON.stringify(chatList));
 		let requests = chatList.map((chat) => {
 			return new Promise(async (resolve) => {
 				let messageList = chat.messages;
@@ -89,12 +90,21 @@ router.get('/chat/uid/:uid', async (req, res) => {
 						return res.status(500).send("DB error")
 					})
 				})
-				resolve(messagePromise);
+				// Sets the recipient ID
+				let recipientID = req.params.uid !== chat.user1 ? chat.user1 : chat.user2;
+				await profiles.findById(recipientID).then((profileDB)=>{
+					chat['recipient'] = profileDB;
+					console.log("Setting recipient")
+					resolve(messagePromise);
+				}).catch((error)=>{
+					console.log(error)
+				})
 			}).catch((error)=>{
 				console.log(error);
 			})
 		})
 		Promise.all(requests).then(() => {
+			console.log(chatList)
 			return res.status(200).send(chatList);
 		}).catch((error) => {
 			console.log(error);
