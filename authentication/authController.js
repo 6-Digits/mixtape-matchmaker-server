@@ -74,7 +74,7 @@ router.post('/register', async (req, res) => {
                 dob: req.body.dob,
                 matchPlaylist: matchMixtape._id
             }).then(async (result) => {
-                await preferences.create({ owner: result._id }).then((preferenceDB) => {
+                await preferences.create({ _id : result._id }).then((preferenceDB) => {
                     return res.status(200).send({ auth: true, token: token, id: result._id });
                 }).catch((error) => {
                     console.log(error)
