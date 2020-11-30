@@ -16,11 +16,13 @@ io.on("connection", (socket) => {
 	// Listen for new messages
 	socket.on(NEW_CHAT_MESSAGE_EVENT, async (data) => {
 		io.in(roomId).emit(NEW_CHAT_MESSAGE_EVENT, data);
+		console.log(data)
 		let message = {
 			user: data.user._id,
 			text: data.body
 		}
-		//console.log(message)
+		console.log(message)
+		console.log(roomId)
 		await messages.create(message).then(async (messageDB)=>{
 			//console.log(messageDB);
 			await chats.findOneAndUpdate({_id: roomId}, {$push: {messages : messageDB._id}}, {new : true}).then((result)=>{

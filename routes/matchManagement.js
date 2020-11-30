@@ -3,6 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const preferences = require('../models/preference');
 const chats = require('../models/chat');
+const profiles = require('../models/profile');
 const messages = require('../models/message');
 const VerifyToken = require('../authentication/verifyToken');
 const Promise = require('bluebird');
