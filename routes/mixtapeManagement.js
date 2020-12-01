@@ -540,8 +540,6 @@ router.post('/view', async (req, res) => {
 		if (!profileDB) {
 			return res.status(404).send("No result for profile.")
 		}
-		let mixtapeViews = profileDB.mixtapeViews
-		let viewedMixtapeIDs = Array.from(profileDB.mixtapeViews.keys());
 		// Disgusting
 		let string = `mixtapeViews.${req.body.mixtapeID}`;
 		let param = {};
