@@ -8,6 +8,8 @@ const messages = require('../models/message');
 const VerifyToken = require('../authentication/verifyToken');
 const Promise = require('bluebird');
 const mixtapes = require('../models/mixtape');
+const songs = require('../models/song');
+const { resolve } = require('bluebird');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference from the database
@@ -16,9 +18,9 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	await preferences.findById(req.params.id, function (err, user) {
 		if (err) {
 			return res.status(500).send("There was a problem getting data from the DB.");
-		}else if(!user){
+		} else if (!user) {
 			return res.status(404).send("No user found.");
-		}else{
+		} else {
 			res.status(200).send(user);
 		}
 	});
@@ -30,9 +32,9 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 	await preferences.findByIdAndUpdate(req.params.id, req.body, function (err, user) {
 		if (err) {
 			return res.status(500).send("There was a problem getting data from the DB.");
-		}else if(!user){
+		} else if (!user) {
 			return res.status(404).send("No user found.");
-		}else{
+		} else {
 			res.status(200).send(user);
 		}
 	});
@@ -41,12 +43,29 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 // Gets the single match-mixtape based on the user's id
 // http://localhost:42069/api/match/mixtape/uid/:uid
 router.get('/mixtape/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
-	await mixtapes.findOne({owner : req.params.uid, match: true}).then((matchMixtape)=>{
-		if (!matchMixtape){
+	await mixtapes.findOne({ owner: req.params.uid, match: true }).then((mixtape) => {
+		if (!mixtape) {
 			return res.status(404).send("No match mixtape found.")
 		}
-		return res.status(200).send(matchMixtape)
-	}).catch((error)=>{
+		let songList = mixtape.songList;
+		mixtape['songList'] = [];
+		let songPromise = Promise.each(songList, async (songID) => {
+			await songs.findById(songID).then((songDB) => {
+				mixtape['songList'].push(songDB)
+			}).catch((error) => {
+				console.log(error);
+				return res.status(500).send("DB error")
+			})
+		}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("DB error")
+		})
+		Promise.all(songPromise).then(() => {
+			console.log(mixtape)
+			return res.status(200).send(mixtape)
+		})
+	
+	}).catch((error) => {
 		console.log(error)
 		return res.status(500).send("Error in getting match mixtape.")
 	})
@@ -55,11 +74,14 @@ router.get('/mixtape/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 // Sets the match-mixtape based on the mixtape id
 // http://localhost:42069/api/match/mixtape/mid/:mid
 router.post('/mixtape/mid/:mid', /*VerifyToken(),*/ async (req, res) => {
+	console.log(req.body)
+	console.log(req.params.mid)
 	await mixtapes.findByIdAndUpdate(req.params.mid, {
 		name: req.body.name,
 		description: req.body.description,
 		songList: req.body.songList,
 	}, { new: true }).then(async (result) => {
+		console.log(result)
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the mixtape.");
 		}
@@ -73,8 +95,8 @@ router.post('/mixtape/mid/:mid', /*VerifyToken(),*/ async (req, res) => {
 // Get all the chats that the user is part of
 // http://localhost:42069/api/match/chat/uid/:uid
 router.get('/chat/uid/:uid', async (req, res) => {
-	await chats.find({$or: [{user1 : req.params.uid}, {user2 : req.params.uid}]}).then((chatList)=>{
-		if (!chatList){
+	await chats.find({ $or: [{ user1: req.params.uid }, { user2: req.params.uid }] }).then((chatList) => {
+		if (!chatList) {
 			return res.status(404).send("No chat found.")
 		}
 		chatList = JSON.parse(JSON.stringify(chatList));
@@ -92,14 +114,14 @@ router.get('/chat/uid/:uid', async (req, res) => {
 				})
 				// Sets the recipient ID
 				let recipientID = req.params.uid !== chat.user1 ? chat.user1 : chat.user2;
-				await profiles.findById(recipientID).then((profileDB)=>{
+				await profiles.findById(recipientID).then((profileDB) => {
 					chat['recipient'] = profileDB;
 					console.log("Setting recipient")
 					resolve(messagePromise);
-				}).catch((error)=>{
+				}).catch((error) => {
 					console.log(error)
 				})
-			}).catch((error)=>{
+			}).catch((error) => {
 				console.log(error);
 			})
 		})
@@ -133,15 +155,15 @@ router.get('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 // Updates a single user=preference in the database
 // http://localhost:42069/api/match/preference/uid/:uid
 router.post('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
-	if (req.body.ageLower < 18){
+	if (req.body.ageLower < 18) {
 		return res.status(500).send("FBI OPEN UP!!!")
 	}
-	await preferences.findByIdAndUpdate(req.params.uid, req.body, { new : true }).then((preferenceDB) => {
-		if (!preferenceDB){
+	await preferences.findByIdAndUpdate(req.params.uid, req.body, { new: true }).then((preferenceDB) => {
+		if (!preferenceDB) {
 			return res.status(404).send("No preference for this user found.")
 		}
 		return res.status(200).send(preferenceDB)
-	}).catch((error)=>{
+	}).catch((error) => {
 		console.log(error)
 		return res.status(500).send("Error in updating the preferences.")
 	})
@@ -149,29 +171,29 @@ router.post('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 
 // Gets an entire list of matched users
 router.get('/matchList', /*VerifyToken(),*/ async (req, res) => {
-    res.status(404).send("To be implemented")
+	res.status(404).send("To be implemented")
 })
 
 // Gets an entire list of possible matches for the user
 router.get('/compatible/uid/:uid', async (req, res) => {
 	// Restrictions in the possible matches to be implemented later
-	await profiles.find({}).then((profileList)=>{
-		if (!profileList){
+	await profiles.find({}).then((profileList) => {
+		if (!profileList) {
 			return res.status(404).send("No compatible profile found.")
 		}
 		profileList = JSON.parse(JSON.stringify(profileList));
 		let requests = profileList.map((profile) => {
 			return new Promise(async (resolve) => {
-				await mixtapes.findOne({_id: profile.matchPlaylist, match : true}).then((mixtape)=>{
+				await mixtapes.findOne({ _id: profile.matchPlaylist, match: true }).then((mixtape) => {
 					console.log(mixtape)
 					profile['matchPlaylist'] = mixtape;
 					//profile['matchPlaylist'] = mixtape;
 					console.log(profile)
-				}).catch((error)=>{
+				}).catch((error) => {
 					console.log(error)
 				})
 				resolve()
-			}).catch((error)=>{
+			}).catch((error) => {
 				console.log(error);
 			})
 		})
@@ -190,7 +212,7 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 
 // TODO: Actual Matching Algorithmn
 router.post('/matching', /*VerifyToken(),*/ async (req, res) => {
-    return res.status(404).send("Matching Algorithmn not implemented")
+	return res.status(404).send("Matching Algorithmn not implemented")
 })
 
 module.exports = router;
