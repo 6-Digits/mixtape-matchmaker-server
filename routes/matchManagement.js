@@ -116,7 +116,7 @@ router.get('/chat/uid/:uid', async (req, res) => {
 				let recipientID = req.params.uid !== chat.user1 ? chat.user1 : chat.user2;
 				await profiles.findById(recipientID).then((profileDB) => {
 					chat['recipient'] = profileDB;
-					console.log("Setting recipient")
+					// console.log("Setting recipient")
 					resolve(messagePromise);
 				}).catch((error) => {
 					console.log(error)
