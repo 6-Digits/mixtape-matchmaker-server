@@ -19,8 +19,8 @@ app.use(expressSession);
 // Chat
 const chat = require('./chatServer');
 
-// match script
-const match = require('./match');
+// link creating script
+const createLinks = require('./createLinks');
 
 // start server on port 42049
 const port = process.env.PORT;

@@ -5,11 +5,11 @@ const preferences = require('../models/preference');
 const chats = require('../models/chat');
 const profiles = require('../models/profile');
 const messages = require('../models/message');
-const VerifyToken = require('../authentication/verifyToken');
-const Promise = require('bluebird');
 const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
-const { resolve } = require('bluebird');
+const VerifyToken = require('../authentication/verifyToken');
+const Promise = require('bluebird');
+
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference from the database
@@ -61,7 +61,6 @@ router.get('/mixtape/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 			return res.status(500).send("DB error")
 		})
 		Promise.all(songPromise).then(() => {
-			console.log(mixtape)
 			return res.status(200).send(mixtape)
 		})
 	
@@ -185,9 +184,7 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 		let requests = profileList.map((profile) => {
 			return new Promise(async (resolve) => {
 				await mixtapes.findOne({ _id: profile.matchPlaylist, match: true }).then((mixtape) => {
-					console.log(mixtape)
 					profile['matchPlaylist'] = mixtape;
-					//profile['matchPlaylist'] = mixtape;
 					console.log(profile)
 				}).catch((error) => {
 					console.log(error)

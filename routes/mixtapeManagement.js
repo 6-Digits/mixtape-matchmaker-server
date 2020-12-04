@@ -6,11 +6,9 @@ const accounts = require('../models/account');
 const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
 const comments = require('../models/comment');
+const profiles = require('../models/profile.js');
 const verifyToken = require('../authentication/verifyToken');
-const bcrypt = require('bcryptjs');
-const profile = require('../models/profile.js');
 const Promise = require('bluebird');
-const mixtape = require('../models/mixtape');
 
 const api = 'http://localhost:42069/api';
 
@@ -54,7 +52,7 @@ router.get('/uid/:id', async (req, res) => {
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
 					await comments.findById(commentID).then(async (commentDB) => {
-						let user = await profile.findById(commentDB['user']);
+						let user = await profiles.findById(commentDB['user']);
 						let comment = {
 							_id: commentDB['_id'],
 							text: commentDB['text'],
@@ -111,7 +109,7 @@ router.get('/popular', async (req, res) => {
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
 					await comments.findById(commentID).then( async (commentDB) => {
-						let user = await profile.findById(commentDB['user']);
+						let user = await profiles.findById(commentDB['user']);
 						let comment = {
 							_id: commentDB['_id'],
 							text: commentDB['text'],
@@ -148,7 +146,7 @@ router.get('/popular', async (req, res) => {
 // Gets a list of mixtapes from the database that the user liked
 // http://localhost:42069/api/mixtape/liked/uid/:uid
 router.get('/liked/uid/:uid', async (req, res) => {
-	await profile.findById(req.params.uid).then((result) => {
+	await profiles.findById(req.params.uid).then((result) => {
 		let likedMixtapeIDs = Array.from(result.mixtapeHearts.keys());
 		let requests = likedMixtapeIDs.map((mixtapeID) => {
 			return new Promise(async (resolve) => {
@@ -177,7 +175,7 @@ router.get('/liked/uid/:uid', async (req, res) => {
 					mixtape['comments'] = [];
 					let commentPromise = Promise.each(commentList, async (commentID) => {
 						await comments.findById(commentID).then( async (commentDB) => {
-							let user = await profile.findById(commentDB['user']);
+							let user = await profiles.findById(commentDB['user']);
 							let comment = {
 								_id: commentDB['_id'],
 								text: commentDB['text'],
@@ -237,7 +235,7 @@ router.get('/search/:query', async (req, res) => {
 				mixtape['comments'] = [];
 				let commentPromise = Promise.each(commentList, async (commentID) => {
 					await comments.findById(commentID).then( async (commentDB) => {
-						let user = await profile.findById(commentDB['user']);
+						let user = await profiles.findById(commentDB['user']);
 						let comment = {
 							_id: commentDB['_id'],
 							text: commentDB['text'],
@@ -411,7 +409,7 @@ router.post('/createComment/mid/:mid', /*verifyToken,*/ async (req, res) => {
 			console.log(error)
 			return res.status(500).send("Error in updating the mixtape comment list.")
 		})
-		let user = await profile.findById(req.body.user);
+		let user = await profiles.findById(req.body.user);
 		let comment = {
 			_id: result['_id'],
 			text: result['text'],
@@ -443,7 +441,7 @@ router.get('/getComments/id/:id', verifyToken, async (req, res) => {
 // Gets a list of mixtape IDs from the database that the user liked
 // http://localhost:42069/api/mixtape/likedIDs/uid/:uid
 router.get('/likedIDs/uid/:uid', async (req, res) => {
-	await profile.findById(req.params.uid).then((result) => {
+	await profiles.findById(req.params.uid).then((result) => {
 		let likedMixtapes = result.mixtapeHearts.toJSON();
 		return res.status(200).send(likedMixtapes);
 	}).catch((error) => {
@@ -457,7 +455,7 @@ router.get('/likedIDs/uid/:uid', async (req, res) => {
 // Assumes that the body contains mixtapeID and userID
 // http://localhost:42069/api/mixtape/like
 router.post('/like', /*verifyToken,*/ async (req, res) => {
-	await profile.findById(req.body.userID).then(async (profileDB) => {
+	await profiles.findById(req.body.userID).then(async (profileDB) => {
 		if (!profileDB) {
 			return res.status(404).send("No result for profile.")
 		}
@@ -470,7 +468,7 @@ router.post('/like', /*verifyToken,*/ async (req, res) => {
 				let string = `mixtapeHearts.${req.body.mixtapeID}`;
 				let param = {};
 				param[string] = true;
-				await profile.findByIdAndUpdate(req.body.userID, { $set: param }).then((result) => {
+				await profiles.findByIdAndUpdate(req.body.userID, { $set: param }).then((result) => {
 					if (!result) {
 						return res.status(404).send("No result found for profile.")
 					}
@@ -498,7 +496,7 @@ router.post('/like', /*verifyToken,*/ async (req, res) => {
 // Assumes that the body contains mixtapeID and userID
 // http://localhost:42069/api/mixtape/unlike
 router.post('/unlike', /*verifyToken,*/ async (req, res) => {
-	await profile.findById(req.body.userID).then(async (profileDB) => {
+	await profiles.findById(req.body.userID).then(async (profileDB) => {
 		if (!profileDB) {
 			return res.status(404).send("No result for profile.")
 		}
@@ -511,7 +509,7 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 				let string = `mixtapeHearts.${req.body.mixtapeID}`;
 				let param = {};
 				param[string] = true;
-				await profile.findByIdAndUpdate(req.body.userID, { $unset: param }).then((result) => {
+				await profiles.findByIdAndUpdate(req.body.userID, { $unset: param }).then((result) => {
 					if (!result) {
 						return res.status(404).send("No result found for profile.")
 					}
@@ -536,7 +534,7 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 
 // http://localhost:42069/api/mixtape/view
 router.post('/view', async (req, res) => {
-	await profile.findById(req.body.userID).then(async (profileDB) => {
+	await profiles.findById(req.body.userID).then(async (profileDB) => {
 		if (!profileDB) {
 			return res.status(404).send("No result for profile.")
 		}
@@ -548,7 +546,7 @@ router.post('/view', async (req, res) => {
 		// It's been an hour since they have viewed the mixtape
 		if (!(profileDB.mixtapeViews.has(req.body.mixtapeID)) || Date.now() - profileDB.mixtapeViews[req.body.mixtapeID] > 3600000) {
 			//console.log(mixtapeViews);
-			await profile.findByIdAndUpdate(req.body.userID, { $set: param }).then(async (result) => {
+			await profiles.findByIdAndUpdate(req.body.userID, { $set: param }).then(async (result) => {
 				await mixtapes.findByIdAndUpdate(req.body.mixtapeID, { $inc: { views: 1 } }).then(async (result) => {
 					if (!result) {
 						return res.status(404).send("No result found for mixtape.")
