@@ -21,8 +21,6 @@ io.on("connection", (socket) => {
 			user: data.user._id,
 			text: data.body
 		}
-		console.log(message)
-		console.log(roomId)
 		await messages.create(message).then(async (messageDB)=>{
 			//console.log(messageDB);
 			await chats.findOneAndUpdate(
