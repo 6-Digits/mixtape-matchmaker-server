@@ -10,6 +10,8 @@ const profiles = require('../models/profile');
 const messages = require('../models/message');
 const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
+const prelinks = require('../models/prelink')
+const links = require('../models/link')
 const VerifyToken = require('../authentication/verifyToken');
 
 const tf = require('@tensorflow/tfjs');
@@ -210,6 +212,31 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("Profile DB error.")
+	})
+})
+//Gives back an array of prelinks
+router.get('/prelinks/uid/:uid', async (req, res) => {
+	await prelinks.find({$or:[{user : req.params.uid}, {liker : req.params.uid}]}).then((result)=>{
+		if(!result){
+			return res.status(400).send("No prelinks for this user.")
+		}
+		return res.status(200).send(result)
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in prelinks DB.")
+	})
+})
+
+//Gives back an array of links
+router.get('/links/uid/:uid', async (req, res) => {
+	await links.find({$or:[{user1 : req.params.uid}, {user2 : req.params.uid}]}).then((result)=>{
+		if(!result){
+			return res.status(400).send("No links for this user.")
+		}
+		return res.status(200).send(result)
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in links DB.")
 	})
 })
 
