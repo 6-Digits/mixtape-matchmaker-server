@@ -21,7 +21,7 @@ io.on("connection", (socket) => {
 			message: data.message,
 			time: Date.now(),
 		}
-		// This is where the server emits back the message
+		// This is where the server emits back the message to a reciever
 		io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
 		await notifications.create(notification).then((result)=>{
 			console.log("Success in creating a notification in DB")
