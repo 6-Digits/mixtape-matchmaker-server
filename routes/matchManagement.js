@@ -221,7 +221,7 @@ router.get('/geocode/:query', async (req, res) => {
 			let data = response.data;
 			let match = data.match(/@-?\d+\.?\d*,-?\d+\.?\d*/)[0].substring(1);
 			let coordinates = match.split(',').map(x => +x);
-			return res.status(200).send(coordinates);
+			return res.status(200).send({ geocode: coordinates });
 		}
 		catch (exception) {
 			console.log('Invalid location');
