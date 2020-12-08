@@ -17,6 +17,10 @@ let preferenceSchema = new Schema({
         default: 18
     },
     location: {
+        type: String,
+        default: ""
+    },
+    geocode: {
         type: Array,
         default: [0.0, 0.0]
     }
