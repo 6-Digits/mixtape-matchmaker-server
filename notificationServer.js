@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
 			if (accountDB.allowNotifications){
 				// This is where the server emits back the message to a reciever
 				io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
-				await notifications.create(notification).then((result)=>{
+				notifications.create(notification).then((result)=>{
 					console.log("Success in creating a notification in DB")
 				}).catch((error)=>{
 					console.log("Error in creating a notification in DB")
