@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const Promise = require('bluebird');
+
 const preferences = require('../models/preference');
 const chats = require('../models/chat');
 const profiles = require('../models/profile');
@@ -9,7 +11,10 @@ const messages = require('../models/message');
 const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
 const VerifyToken = require('../authentication/verifyToken');
-const Promise = require('bluebird');
+
+const tf = require('@tensorflow/tfjs');
+require('@tensorflow/tfjs-node'); // CPU computation
+const use = require('@tensorflow-models/universal-sentence-encoder');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -230,8 +235,15 @@ router.get('/geocode/:query', async (req, res) => {
 
 
 // TODO: Actual Matching Algorithm
-router.post('/matching', async (req, res) => {
-	return res.status(404).send("Matching Algorithmn not implemented")
+router.get('/matching', async (req, res) => {
+	const tags = ['rock', 'pop', 'something', 'else'];
+	let data = use.load().then(model => {
+		model.embed(tags).then(embeddings => {
+			embeddings.print(true);
+		})
+	});
+	
+	return res.status(200).send('yes');
 })
 
 module.exports = router;
