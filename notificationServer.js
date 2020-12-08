@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
 			message: data.message,
 			time: Date.now(),
 		}
-		await accounts.findById(date.reciever).then((accountDB)=>{
+		await accounts.findById(date.reciever).then(async(accountDB)=>{
 			if (accountDB.allowNotifications){
 				// This is where the server emits back the message to a reciever
 				io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
