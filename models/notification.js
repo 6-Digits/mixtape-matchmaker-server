@@ -17,7 +17,10 @@ let notificationSchema = new Schema({
     time: {
         type: Date,
         required: true,
-        default: Date.now()
+    },
+    deleted: {
+        type: Boolean,
+        default: false
     }
 })
 

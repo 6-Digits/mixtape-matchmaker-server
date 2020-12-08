@@ -16,8 +16,11 @@ const expressSession = require('express-session')({
 });
 app.use(expressSession);
 
-// Chat
+// Chat Server
 const chat = require('./chatServer');
+
+// Notification Server
+const notification = require('./notificationServer');
 
 // link creating script
 const createLinks = require('./createLinks');

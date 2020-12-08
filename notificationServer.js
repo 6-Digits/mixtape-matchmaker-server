@@ -14,13 +14,14 @@ io.on("connection", (socket) => {
 
 	// Listen for new messages
 	socket.on(NEW_NOTIFICATION_EVENT, async (data) => {
+		// This is where the server emits back the message
 		io.in(roomId).emit(NEW_NOTIFICATION_EVENT, data);
 		console.log(data)
 		let notifications = {
-			user: data.user._id,
-			text: data.body
+			user: data.reciever,
+			text: data.message
 		}
-        console.log(notification)
+		console.log(notifications)
 	});
 
 	// Leave the room if the user closes the socket
