@@ -17,8 +17,8 @@ let preferenceSchema = new Schema({
         default: 18
     },
     location: {
-        type: String,
-        default: ""
+        type: Array,
+        default: [0.0, 0.0]
     }
 })
 
