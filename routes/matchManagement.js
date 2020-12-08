@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
+const axios = require('axios');
 const preferences = require('../models/preference');
 const chats = require('../models/chat');
 const profiles = require('../models/profile');
@@ -207,8 +208,29 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 	})
 })
 
-// TODO: Actual Matching Algorithmn
-router.post('/matching', /*VerifyToken(),*/ async (req, res) => {
+router.get('/geocode/:query', async (req, res) => {
+	const url = `https://www.google.com/maps/search/${req.params.query}`;
+	
+	axios.get(url).then((response) => {
+		try {
+			let data = response.data;
+			let match = data.match(/@-?\d+\.?\d*,-?\d+\.?\d*/)[0].substring(1);
+			let coordinates = match.split(',').map(x => +x);
+			return res.status(200).send(coordinates);
+		}
+		catch (exception) {
+			console.log('Invalid location');
+			return res.status(400).send('Invalid location');
+		}
+	}).catch((error) => {
+		console.log(error.message);
+		return res.status(500).send(error.message);
+	});
+})
+
+
+// TODO: Actual Matching Algorithm
+router.post('/matching', async (req, res) => {
 	return res.status(404).send("Matching Algorithmn not implemented")
 })
 

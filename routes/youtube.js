@@ -59,7 +59,7 @@ router.get('/video/:id', async (req, res) => {
 			return res.status(200).send(song);
 		}
 		else {
-			res.status(404).send("Invalid YouTube ID");
+			return res.status(404).send("Invalid YouTube ID");
 		}
 	}).catch((error) => {
 		console.log(error.message);
