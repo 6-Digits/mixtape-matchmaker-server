@@ -124,9 +124,9 @@ router.get('/notifications/uid/:uid', async (req, res) => {
 })
 
 // Note that calling this route sends back the delete operation
-// http://localhost:42069/api/profile/notificatons/nid/:nid
+// http://localhost:42069/api/profile/notifications/nid/:nid
 router.post('/notifications/nid/:nid', async (req, res) => {
-	await notifications.deleteOne({ _id: req.params.id }).then((result) => {
+	await notifications.findByIdAndDelete(req.params.nid).then((result) => {
 		if (!result) {
 			return res.status(404).send("No user found.");
 		}
