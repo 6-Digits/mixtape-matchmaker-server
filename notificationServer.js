@@ -14,14 +14,21 @@ io.on("connection", (socket) => {
 
 	// Listen for new messages
 	socket.on(NEW_NOTIFICATION_EVENT, async (data) => {
-		// This is where the server emits back the message
-		io.in(roomId).emit(NEW_NOTIFICATION_EVENT, data);
-		console.log(data)
-		let notifications = {
+		//console.log(roomId)
+		//console.log(data)
+		let notification = {
 			user: data.reciever,
-			text: data.message
+			message: data.message,
+			time: Date.now(),
 		}
-		console.log(notifications)
+		// This is where the server emits back the message
+		io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
+		await notifications.create(notification).then((result)=>{
+			console.log("Success in creating a notification in DB")
+		}).catch((error)=>{
+			console.log("Error in creating a notification in DB")
+		})
+		//console.log(notification)
 	});
 
 	// Leave the room if the user closes the socket
