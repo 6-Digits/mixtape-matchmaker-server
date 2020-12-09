@@ -300,6 +300,7 @@ router.post('/link/lid/:lid', async (req, res) => {
 })
 
 // Gets all the matches for that user
+// http://localhost:42069/api/match/matches/uid/:uid
 router.get('/matches/uid/:uid', async (req, res) => {
 	await matches.findById(req.params.uid).then(async (matchDB) => {
 		let returnValue = []
@@ -313,8 +314,8 @@ router.get('/matches/uid/:uid', async (req, res) => {
 			let matchTemp = {};
 			let mixtapeTemp = [];
 			await mixtapes.findOne({ owner: userID, match: true }).then(async (mixtapeDB) => {
-				matchTemp['mixtapeDescription'] = mixtapeDB.description;
-				matchTemp['mixtapeName'] = mixtapeDB.name
+				matchTemp['playlistDescription'] = mixtapeDB.description;
+				matchTemp['playlistName'] = mixtapeDB.name
 				let songList = mixtapeDB.songList;
 				let songPromise = Promise.each(songList, async (songID) => {
 					await songs.findById(songID).then((songDB) => {
