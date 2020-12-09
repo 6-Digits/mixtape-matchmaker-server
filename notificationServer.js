@@ -2,6 +2,7 @@ require('dotenv').config();
 const server = require("http").createServer();
 const io = require("socket.io")(server);
 const notifications = require('./models/notification')
+const accounts = require('./models/account')
 const PORT = process.env.NOTIFICATION_PORT;
 const NEW_NOTIFICATION_EVENT = "newNotificationEvent";
 
@@ -21,12 +22,19 @@ io.on("connection", (socket) => {
 			message: data.message,
 			time: Date.now(),
 		}
-		// This is where the server emits back the message to a reciever
-		io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
-		await notifications.create(notification).then((result)=>{
-			console.log("Success in creating a notification in DB")
+		await accounts.findById(data.reciever).then(async(accountDB)=>{
+			if (accountDB.allowNotifications){
+				// This is where the server emits back the message to a reciever
+				io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
+				notifications.create(notification).then((result)=>{
+					console.log("Success in creating a notification in DB")
+				}).catch((error)=>{
+					console.log("Error in creating a notification in DB")
+				})
+			}
 		}).catch((error)=>{
-			console.log("Error in creating a notification in DB")
+			console.log("Error finding the account")
+			console.log(error)
 		})
 		//console.log(notification)
 	});
