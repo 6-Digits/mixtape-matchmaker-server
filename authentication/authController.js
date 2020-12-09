@@ -15,6 +15,7 @@ const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const bcrypt = require('bcryptjs');
 const mixtapes = require('../models/mixtape');
 const preferences = require('../models/preference');
+const matches = require('../models/match')
 
 // http://localhost:42069/api/auth/login
 router.post('/login', async (req, res) => {
@@ -74,8 +75,13 @@ router.post('/register', async (req, res) => {
                 dob: req.body.dob,
                 matchPlaylist: matchMixtape._id
             }).then(async (result) => {
-                await preferences.create({ _id : result._id }).then((preferenceDB) => {
-                    return res.status(200).send({ auth: true, token: token, id: result._id });
+                await preferences.create({ _id : result._id }).then(async (preferenceDB) => {
+                    await matches.create({_id : result._id}).then(async(matchDB)=>{
+                        return res.status(200).send({ auth: true, token: token, id: result._id });
+                    }).catch((error)=>{
+                        console.log(error)
+                        return res.status(500).send("Error in creating default match for user")
+                    })
                 }).catch((error) => {
                     console.log(error)
                     return res.status(500).send("Error in creating a preferences")
