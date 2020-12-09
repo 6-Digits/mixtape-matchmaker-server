@@ -16,12 +16,6 @@ const links = require('../models/link')
 const matches = require('../models/match')
 const VerifyToken = require('../authentication/verifyToken');
 
-const tf = require('@tensorflow/tfjs');
-require('@tensorflow/tfjs-node'); // CPU computation
-const use = require('@tensorflow-models/universal-sentence-encoder');
-const { resolve } = require('bluebird');
-const { profile } = require('@tensorflow/tfjs');
-
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference from the database
@@ -80,6 +74,42 @@ router.get('/mixtape/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 		console.log(error)
 		return res.status(500).send("Error in getting match mixtape.")
 	})
+})
+
+// Get all match mixtapes
+// http://localhost:42069/api/match/mixtapes
+router.get('/mixtapes', async (req, res) => {
+	await mixtapes.find({ match: true }).then((mixtapes) => {
+		if (!mixtapes) {
+			return res.status(404).send("No mixtapes found.");
+		}
+		let requests = mixtapes.map((mixtape) => {
+			return new Promise(async (resolve) => {
+				let songList = mixtape.songList;
+				mixtape['songList'] = [];
+				let songPromise = Promise.each(songList, async (songID) => {
+					await songs.findById(songID).then((songDB) => {
+						mixtape['songList'].push(songDB)
+					}).catch((error) => {
+						console.log(error);
+						return res.status(500).send("DB error")
+					})
+				});
+				Promise.all(songPromise).then(() => {
+					resolve();
+				});
+			})
+		})
+		Promise.all(requests).then(() => {
+			return res.status(200).send(mixtapes);
+		}).catch((error) => {
+			console.log(error);
+			return res.status(500).send("Promise error, good luck.")
+		})
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("There is a problem with finding the mixtape.");
+	});
 })
 
 // Sets the match-mixtape based on the mixtape id
@@ -344,34 +374,6 @@ router.get('/geocode/:query', async (req, res) => {
 	}).catch((error) => {
 		console.log(error.message);
 		return res.status(500).send(error.message);
-	});
-})
-
-// TODO: Actual Matching Algorithm
-router.get('/matching', async (req, res) => {
-	const uid = '5fc2ee3de3281f26881e1915';
-	let prefsResult = await axios.get(`${process.env.SERVER_API}/match/id/${uid}`);
-	let mixtapeResult = await axios.get(`${process.env.SERVER_API}/match/mixtape/uid/${uid}`);
-	let prefs = prefsResult.data;
-	let mixtape = mixtapeResult.data;
-	let genres = mixtape['songList'].map(x => x['genre'])
-
-	use.load().then(async (model) => {
-		let scores = [];
-
-		for (genre of genres) {
-			const embeddings = await model.embed(genre);
-			const score = tf.mean(embeddings, 0);
-			scores.push(score);
-		}
-
-		scores = tf.stack(scores);
-		const embedding = tf.mean(scores, 0);
-
-		return res.status(200).send({ embeddings: embedding, tensor: embedding.arraySync() });
-	}).catch((error) => {
-		console.log(error);
-		return res.status(500).send(error.message)
 	});
 })
 
