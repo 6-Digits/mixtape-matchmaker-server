@@ -4,13 +4,13 @@ let Schema = mongoose.Schema;
 let notificationSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'acccount'
+        ref: 'account'
     },
     message: {
         type: String,
         default: ""
     },
-    link:{
+    link: {
         type: String,
         default: "http://localhost:8080/home"
     },

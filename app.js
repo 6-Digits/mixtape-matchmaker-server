@@ -25,6 +25,9 @@ const notification = require('./notificationServer');
 // link creating script
 const createLinks = require('./createLinks');
 
+// match creating script
+const createMatches = require('./createMatches');
+
 // start server on port 42049
 const port = process.env.PORT;
 app.listen(port, () => {
