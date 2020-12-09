@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -9,8 +10,6 @@ const comments = require('../models/comment');
 const profiles = require('../models/profile.js');
 const verifyToken = require('../authentication/verifyToken');
 const Promise = require('bluebird');
-
-const api = 'http://localhost:42069/api';
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -361,7 +360,7 @@ router.post('/createSong/:videoId', async (req, res) => {
 		if (result) {
 			return res.status(200).send(result);
 		} else {
-			let result = await axios.get(`${api}/youtube/video/${req.params.videoId}`).catch((error => {
+			let result = await axios.get(`${process.env.SERVER_API}/youtube/video/${req.params.videoId}`).catch((error => {
 				console.log(error);
 				return res.status(500).send("Error in YouTube query.");
 			}));
