@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -233,17 +234,32 @@ router.get('/geocode/:query', async (req, res) => {
 	});
 })
 
-
 // TODO: Actual Matching Algorithm
 router.get('/matching', async (req, res) => {
-	const tags = ['rock', 'pop', 'something', 'else'];
-	let data = use.load().then(model => {
-		model.embed(tags).then(embeddings => {
-			embeddings.print(true);
-		})
-	});
+	const uid = '5fc2ee3de3281f26881e1915';
+	let prefsResult = await axios.get(`${process.env.SERVER_API}/match/id/${uid}`);
+	let mixtapeResult = await axios.get(`${process.env.SERVER_API}/match/mixtape/uid/${uid}`);
+	let prefs = prefsResult.data;
+	let mixtape = mixtapeResult.data;
+	let genres = mixtape['songList'].map(x => x['genre'])
 	
-	return res.status(200).send('yes');
+	use.load().then(async (model) => {
+		let scores = [];
+		
+		for (genre of genres) {
+			const embeddings = await model.embed(genre);
+			const score = tf.mean(embeddings, 0);
+			scores.push(score);
+		}
+		
+		scores = tf.stack(scores);
+		const embedding = tf.mean(scores, 0);
+		
+		return res.status(200).send({embeddings: embedding, tensor: embedding.arraySync()});
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send(error.message)
+	});
 })
 
 module.exports = router;
