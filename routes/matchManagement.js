@@ -13,11 +13,14 @@ const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
 const prelinks = require('../models/prelink')
 const links = require('../models/link')
+const matches = require('../models/match')
 const VerifyToken = require('../authentication/verifyToken');
 
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node'); // CPU computation
 const use = require('@tensorflow-models/universal-sentence-encoder');
+const { resolve } = require('bluebird');
+const { profile } = require('@tensorflow/tfjs');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -264,6 +267,63 @@ router.post('/link/lid/:lid', async (req, res) => {
 		console.log(error)
 		return res.status(500).send("Error in links DB.")
 	})
+})
+
+// Gets all the matches for that user
+router.get('/matches/uid/:uid', async (req, res)=>{
+	let returnValue = []
+	await matches.findById(req.params.uid).then(async (matchDB)=>{
+		if(!matchDB){
+			return res.status(404).send("No match in DB")
+		}else if (matchDB.matches.length < 1){
+			return res.status(404).send("No matches yet, need to run algo.")
+		}
+		let matchList = matchDB.matches;
+		Promise.each(matchList, async(userID)=>{
+			let matchTemp = {};
+			let mixtapeTemp = [];
+			await mixtapes.findOne({owner : userID, match : true}).then((mixtapeDB)=>{
+				matchTemp['mixtapeDescription'] = mixtapeDB.description;
+				matchTemp['mixtapeName'] = mixtapeDB.name
+				let songList = mixtapeDB.songList;
+				Promise.each(songList, async (songID) => {
+					await songs.findById(songID).then((songDB) => {
+						mixtapeTemp.push(songDB)
+					}).catch((error) => {
+						console.log(error);
+						return res.status(500).send("DB error")
+					})
+				}).then(async (result)=>{
+					matchTemp['songList'] = mixtapeTemp;
+					await profiles.findById(userID).then((profileDB)=>{
+						matchTemp['_id'] = userID
+						matchTemp['gender'] = profileDB.gender
+						matchTemp['imgSrc'] = profileDB.imgSrc
+						matchTemp['name'] = profileDB.name
+						matchTemp['userName'] = profileDB.userName
+						returnValue.push(matchTemp)
+					}).catch((error)=>{
+						console.log(error)
+						return res.status(500).send("Profile Error.")
+					})
+				}).catch((error)=>{
+					console.log(error)
+					return res.status(500).send("Error in adding songs.")
+				})
+			}).catch((error)=>{
+				console.log(error)
+				return res.status(500).send("Error in finding mixtape.")
+			})
+		}).then((result) => {
+			// Finished all items in matchList
+			return res.status(200).send(returnValue);
+		}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("Promise Error")
+		})
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in finding matchDB.")
 })
 
 router.get('/geocode/:query', async (req, res) => {
