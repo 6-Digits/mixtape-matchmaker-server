@@ -30,9 +30,9 @@ async function createMatches() {
 				const genres = user['genres'];
 				const uid = user['id']
 				
-				if (genres.length === 0) {
-					continue;
-				}
+				// if (genres.length === 0) {
+				// 	continue;
+				// }
 				
 				// for (const genre of genres) {
 				// 	if (genre.length > 0) {
@@ -42,13 +42,13 @@ async function createMatches() {
 				// 	}
 				// }
 				
-				if (scores.length === 0) {
-					continue;
-				}
+				// if (scores.length === 0) {
+				// 	continue;
+				// }
 				
 				// scores = tf.stack(scores);
 				// const embedding = tf.mean(scores, 0);
-				const embedding = 1;
+				const embedding = genres.length;
 				
 				const profile = await profiles.findById(uid);
 				const preference = await preferences.findById(uid);
