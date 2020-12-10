@@ -180,12 +180,13 @@ router.get('/chat/uid/:uid', async (req, res) => {
 })
 
 // Removes a match, ie deletes a chat and it's messages and add it to profileDislike
-router.get('/removeMatch', async (req, res) => {
+router.post('/removeMatch', async (req, res) => {
 	await chats.findByIdAndDelete(req.body.chatID).then(async (deletedChat)=>{
 		if(!deletedChat){
 			return res.status(404).send("Can't find that chat")
 		}
 		await messages.deleteMany({_id : {$in : deletedChat.messages}}).then(async (result)=>{
+			// Is the code below really neccessary for overall functionality?
 			let string1 = `profileDislikes.${req.body.reciever}`;
 			let param1 = {};
 			param1[string1] = Date.now();
