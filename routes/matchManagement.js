@@ -250,10 +250,13 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 })
 
 router.post('/like', async (req, res) => {
-	let string = `profileLikes.${req.body.reciever}`;
-	let param = {};
-	param[string] = Date.now();
-	await profiles.findByIdAndUpdate(req.body.user, { $set: param }).then(async (profileDB) => {
+	let string1 = `profileLikes.${req.body.reciever}`;
+	let param1 = {};
+	param1[string1] = Date.now();
+	let string2 = `profileDislikes.${req.body.reciever}`;
+	let param2 = {};
+	param2[string2] = Date.now();
+	await profiles.findByIdAndUpdate(req.body.user, {$set: param1, $unset: param2}).then(async (profileDB) => {
 		await prelinks.create({ user: req.body.reciever, liker: req.body.user}).then(async (prelink)=>{
 			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.reciever}}).then(async (matchDB)=>{
 				return res.status(200).send(matchDB)
@@ -271,10 +274,13 @@ router.post('/like', async (req, res) => {
 	})
 })
 router.post('/dislike', async (req, res) => {
-	let string = `profileDislikes.${req.body.reciever}`;
-	let param = {};
-	param[string] = Date.now();
-	await profiles.findByIdAndUpdate(req.body.user, { $set: param }).then(async (profileDB) => {
+	let string1 = `profileDislikes.${req.body.reciever}`;
+	let param1 = {};
+	param1[string1] = Date.now();
+	let string2 = `profileLikes.${req.body.reciever}`;
+	let param2 = {};
+	param2[string2] = Date.now();
+	await profiles.findByIdAndUpdate(req.body.user, { $set: param1, $unset: param2}).then(async (profileDB) => {
 		// There may not be any prelink to delete, so prelinkDB might be empty but we never use it anyway
 		await prelinks.findOneAndDelete({user: req.body.reciever, liker: req.body.user}).then(async (prelink)=>{
 			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.reciever}}).then(async (matchDB)=>{
