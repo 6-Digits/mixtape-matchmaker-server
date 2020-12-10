@@ -25,7 +25,7 @@ async function createMatches() {
 		
 		let userEmbeddings = []
 		await use.load().then(async (model) => {
-			for (const user of users) {				
+			for (const user of users) {
 				const genres = user['genres'];
 				const uid = user['id']
 				const embedding = [genres.length];
@@ -53,21 +53,22 @@ async function createMatches() {
 		let matchLists = await matches.find();
 		for (const match of matchLists) {
 			if (match['matches'].length === 0) {
-				const current = userEmbeddings.find(e => e['_id'] == match['_id']);
+				const current = await userEmbeddings.find(e => e['_id'] == match['_id']);
 				if (current == undefined || current == null) {
 					continue;
 				}
 				
 				let scores = [];
 				for (const user of userEmbeddings) {
-					if (user['_id'] == current['_id'] || user['_id'] in current['profileLikes'] || 
+					if (user['_id'] == current['_id'] || current['profileLikes'].has(user['_id']) || 
 						(user['gender'] != current['genderPref'] && current['genderPref'] != "No Preference") || 
 						user['age'] < current['ageLower'] || user['age'] > current['ageUpper']) {
-						continue;
+							continue;
 					}
-					if (user['_id'] in current['profileDislikes']) {
-						const time = current['profileDislikes'][user['_id']];
-						if (Date.now() - time > 3600000 * 7) {
+					
+					if (current['profileDislikes'].has(user['_id'])) {
+						const time = current['profileDislikes'].get(user['_id']);
+						if (Date.now() - time < 3600000 * 7) {
 							continue;
 						}
 					}
@@ -102,4 +103,4 @@ async function createMatches() {
 setTimeout(async function timer() {
 	await createMatches();
 	setTimeout(timer, delay);
-}, delay);
+}, 0);

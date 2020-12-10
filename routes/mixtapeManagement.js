@@ -548,7 +548,7 @@ router.post('/view', async (req, res) => {
 		param[string] = Date.now();
 		// There is no mixtapeID in the map OR
 		// It's been an hour since they have viewed the mixtape
-		if (!(profileDB.mixtapeViews.has(req.body.mixtapeID)) || Date.now() - profileDB.mixtapeViews[req.body.mixtapeID] > 3600000) {
+		if (!(profileDB.mixtapeViews.has(req.body.mixtapeID)) || Date.now() - profileDB.mixtapeViews.get(req.body.mixtapeID) > 3600000) {
 			//console.log(mixtapeViews);
 			await profiles.findByIdAndUpdate(req.body.userID, { $set: param }).then(async (result) => {
 				await mixtapes.findByIdAndUpdate(req.body.mixtapeID, { $inc: { views: 1 } }).then(async (result) => {
