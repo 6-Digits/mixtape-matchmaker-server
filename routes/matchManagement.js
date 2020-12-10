@@ -179,6 +179,35 @@ router.get('/chat/uid/:uid', async (req, res) => {
 	})
 })
 
+// Removes a match, ie deletes a chat and it's messages and add it to profileDislike
+router.get('/removeMatch', async (req, res) => {
+	await chats.findByIdAndDelete(req.body.chatID).then(async (deletedChat)=>{
+		if(!deletedChat){
+			return res.status(404).send("Can't find that chat")
+		}
+		await messages.deleteMany({_id : {$in : deletedChat.messages}}).then(async (result)=>{
+			let string1 = `profileDislikes.${req.body.reciever}`;
+			let param1 = {};
+			param1[string1] = Date.now();
+			let string2 = `profileLikes.${req.body.reciever}`;
+			let param2 = {};
+			param2[string2] = Date.now();
+			await profiles.findByIdAndUpdate(req.body.user, { $set: param1, $unset: param2}).then(async (profileDB) => {
+				return res.status(200).send("Deleted chat")
+			}).catch((error)=>{
+				console.log(error)
+				return res.status(500).send("Error in updating profile")
+			})
+		}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("Error in deleting messages")
+		})
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error deleting chat")
+	})
+})
+
 // Gets a single user-preference JSON from the database
 // http://localhost:42069/api/match/preference/uid/:uid
 router.get('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
