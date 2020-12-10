@@ -248,6 +248,29 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 		return res.status(500).send("Profile DB error.")
 	})
 })
+
+router.post('/like', async (req, res) => {
+	let string = `profileLikes.${req.body.reciever}`;
+	let param = {};
+	param[string] = Date.now();
+	await profiles.findByIdAndUpdate(req.body.user, { $set: param }).then(async (profileDB) => {
+		await prelinks.create({ user: req.body.reciever, liker: req.body.user}).then(async (prelink)=>{
+			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.reciever}}).then(async (matchDB)=>{
+				return res.status(200).send(matchDB)
+			}).catch((error)=>{
+				console.log(error)
+				return res.status(500).send("Error in matches")
+			})
+		}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("Error in matches")
+		})
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in matches")
+	})
+})
+
 // Gives back an array of prelinks
 router.get('/prelinks/uid/:uid', async (req, res) => {
 	await prelinks.find({ $or: [{ user: req.params.uid }, { liker: req.params.uid }] }).then((result) => {
