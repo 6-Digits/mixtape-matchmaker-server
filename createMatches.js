@@ -34,20 +34,21 @@ async function createMatches() {
 					continue;
 				}
 				
-				for (const genre of genres) {
-					if (genre.length > 0) {
-						const embeddings = await model.embed(genre);
-						const score = tf.mean(embeddings, 0);
-						scores.push(score);
-					}
-				}
+				// for (const genre of genres) {
+				// 	if (genre.length > 0) {
+				// 		const embeddings = await model.embed(genre);
+				// 		const score = tf.mean(embeddings, 0);
+				// 		scores.push(score);
+				// 	}
+				// }
 				
 				if (scores.length === 0) {
 					continue;
 				}
 				
-				scores = tf.stack(scores);
-				const embedding = tf.mean(scores, 0);
+				// scores = tf.stack(scores);
+				// const embedding = tf.mean(scores, 0);
+				const embedding = 1;
 				
 				const profile = await profiles.findById(uid);
 				const preference = await preferences.findById(uid);
@@ -73,6 +74,10 @@ async function createMatches() {
 		for (const match of matchLists) {
 			if (match['matches'].length === 0) {
 				const current = userEmbeddings.find(e => e['_id'] == match['_id']);
+				if (current == undefined || current == null) {
+					continue;
+				}
+				
 				let scores = [];
 				for (const user of userEmbeddings) {
 					if (user['_id'] == current['_id'] || user['_id'] in current['profileLikes'] || 
@@ -87,7 +92,7 @@ async function createMatches() {
 						}
 					}
 					
-					let mixtapeScore = tf.metrics.cosineProximity(user['embedding'], current['embedding']).arraySync();
+					let mixtapeScore = tf.metrics.cosineProximity(tf.tensor(user['embedding']), tf.tensor(current['embedding'])).arraySync();
 					let locationScore = tf.metrics.meanAbsoluteError(tf.tensor(user['geocode']), tf.tensor(current['geocode'])).arraySync();
 					if (locationScore < 0.0001) {
 						locationScore = 0.0001;
@@ -117,4 +122,4 @@ async function createMatches() {
 setTimeout(async function timer() {
 	await createMatches();
 	setTimeout(timer, delay);
-}, delay);
+}, 0);
