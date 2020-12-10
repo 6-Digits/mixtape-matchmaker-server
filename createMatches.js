@@ -103,4 +103,4 @@ async function createMatches() {
 setTimeout(async function timer() {
 	await createMatches();
 	setTimeout(timer, delay);
-}, 0);
+}, delay);

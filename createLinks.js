@@ -101,4 +101,5 @@ async function createLinks() {
 
 setTimeout(async function timer() {
 	await createLinks();
+	setTimeout(timer, delay);
 }, delay);
