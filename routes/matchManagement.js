@@ -263,7 +263,29 @@ router.post('/like', async (req, res) => {
 			})
 		}).catch((error)=>{
 			console.log(error)
-			return res.status(500).send("Error in matches")
+			return res.status(500).send("Error in prelinks")
+		})
+	}).catch((error)=>{
+		console.log(error)
+		return res.status(500).send("Error in matches")
+	})
+})
+router.post('/dislike', async (req, res) => {
+	let string = `profileDislikes.${req.body.reciever}`;
+	let param = {};
+	param[string] = Date.now();
+	await profiles.findByIdAndUpdate(req.body.user, { $set: param }).then(async (profileDB) => {
+		// There may not be any prelink to delete, so prelinkDB might be empty but we never use it anyway
+		await prelinks.findOneAndDelete({user: req.body.reciever, liker: req.body.user}).then(async (prelink)=>{
+			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.reciever}}).then(async (matchDB)=>{
+				return res.status(200).send(matchDB)
+			}).catch((error)=>{
+				console.log(error)
+				return res.status(500).send("Error in matches")
+			})
+		}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("Error in prelinks")
 		})
 	}).catch((error)=>{
 		console.log(error)
