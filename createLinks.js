@@ -1,5 +1,6 @@
 require('dotenv').config()
 const prelinks = require('./models/prelink');
+const chats = require('./models/chat')
 const links = require('./models/link');
 
 const delay = 60000;
@@ -43,15 +44,18 @@ async function createLinks() {
 			let user2 = match['user2'];
 			if (!set.has([user1, user2].toString()) && !set.has([user2, user1].toString())) {
 				set.add([user1, user2].toString());
-				await links.create({
+				await chats.create({
 					user1: user1,
-					user2: user2
+					user2: user2,
+					creationDate: Date.now()
 				}).catch((error) => {
 					console.log(error);
 				})
 			};
 			await prelinks.deleteOne( { _id: res['_id'] } ).catch((error) => {
 				console.log(error);
+			}).catch((error)=>{
+				console.log(error)
 			})
 		});
 	}
