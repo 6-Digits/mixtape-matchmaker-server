@@ -8,7 +8,7 @@ const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node'); // CPU computation
 const use = require('@tensorflow-models/universal-sentence-encoder');
 
-const delay = 60000;
+const delay = 120000;
 
 async function createMatches() {
 	try {
@@ -25,15 +25,25 @@ async function createMatches() {
 		
 		let userEmbeddings = []
 		await use.load().then(async (model) => {
-			for (const user of users) {
+			for (const user of users) {				
 				let scores = [];
 				const genres = user['genres'];
 				const uid = user['id']
 				
+				if (genres.length === 0) {
+					continue;
+				}
+				
 				for (const genre of genres) {
-					const embeddings = await model.embed(genre);
-					const score = tf.mean(embeddings, 0);
-					scores.push(score);
+					if (genre.length > 0) {
+						const embeddings = await model.embed(genre);
+						const score = tf.mean(embeddings, 0);
+						scores.push(score);
+					}
+				}
+				
+				if (scores.length === 0) {
+					continue;
 				}
 				
 				scores = tf.stack(scores);
@@ -77,18 +87,24 @@ async function createMatches() {
 						}
 					}
 					
-					const mixtapeScore = tf.metrics.cosineProximity(user['embedding'], current['embedding']).arraySync();
-					const locationScore = tf.metrics.cosineProximity(tf.tensor(user['geocode']), tf.tensor(current['geocode'])).arraySync();
+					let mixtapeScore = tf.metrics.cosineProximity(user['embedding'], current['embedding']).arraySync();
+					let locationScore = tf.metrics.meanAbsoluteError(tf.tensor(user['geocode']), tf.tensor(current['geocode'])).arraySync();
+					if (locationScore < 0.0001) {
+						locationScore = 0.0001;
+					}
+					
 					const score = {
 						_id: user['_id'],
-						score: 0.75 * mixtapeScore + 0.25 * locationScore
+						score: mixtapeScore / locationScore
 					};
 					scores.push(score);
 				}
 				
-				scores.sort((a, b) => b['score'] - a['score']);
-				const matchList = scores.slice(0, 10).map(x => x['_id']);
-				await matches.findByIdAndUpdate(current['_id'], { matches: matchList });
+				if (scores.length > 0) {
+					scores.sort((a, b) => b['score'] - a['score']);
+					const matchList = scores.slice(0, 10).map(x => x['_id']);
+					await matches.findByIdAndUpdate(current['_id'], { matches: matchList });
+				}
 			}
 		}
 	}

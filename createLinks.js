@@ -1,6 +1,7 @@
 require('dotenv').config()
 const prelinks = require('./models/prelink');
-const chats = require('./models/chat');
+const chats = require('./models/chat')
+const links = require('./models/link');
 
 const delay = 60000;
 
@@ -54,6 +55,8 @@ async function createLinks() {
 			};
 			await prelinks.deleteOne( { _id: res['_id'] } ).catch((error) => {
 				console.log(error);
+			}).catch((error)=>{
+				console.log(error)
 			})
 		});
 	}
