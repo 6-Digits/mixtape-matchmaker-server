@@ -49,3 +49,7 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
 	console.log(`Notification server on port ${PORT}`);
 });
+
+module.exports = {
+	io: io
+};

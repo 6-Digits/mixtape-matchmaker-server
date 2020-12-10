@@ -2,7 +2,9 @@ require('dotenv').config()
 const prelinks = require('./models/prelink');
 const chats = require('./models/chat')
 const links = require('./models/link');
-
+const notifications = require('./models/notification')
+const accounts = require('./models/account')
+const io = require('./notificationServer').io;
 const delay = 60000;
 
 async function createLinks() {
@@ -51,8 +53,41 @@ async function createLinks() {
 				}).catch((error) => {
 					console.log(error);
 				})
-
 			};
+			// Notification ping for user 1
+			let notification1 = {
+				user: user1,
+				message: "A new match was found",
+				time: Date.now(),
+			}
+			await accounts.findById(user1).then(async(accountDB)=>{
+				if (accountDB.allowNotifications){
+					// This is where the server emits back the message to a reciever
+					io.in(user1).emit(NEW_NOTIFICATION_EVENT, notification1);
+					notifications.create(notification1).then((result)=>{
+						console.log("Success in creating a notification in DB")
+					}).catch((error)=>{
+						console.log("Error in creating a notification in DB")
+					})
+				}
+			})
+			// Notification ping for user 2
+			let notification2 = {
+				user: user2,
+				message: "A new match was found",
+				time: Date.now(),
+			}
+			await accounts.findById(user2).then(async(accountDB)=>{
+				if (accountDB.allowNotifications){
+					// This is where the server emits back the message to a reciever
+					io.in(user2).emit(NEW_NOTIFICATION_EVENT, notification2);
+					notifications.create(notification2).then((result)=>{
+						console.log("Success in creating a notification in DB")
+					}).catch((error)=>{
+						console.log("Error in creating a notification in DB")
+					})
+				}
+			})
 			await prelinks.deleteOne( { _id: res['_id'] } ).catch((error) => {
 				console.log(error);
 			}).catch((error)=>{
