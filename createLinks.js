@@ -38,10 +38,11 @@ async function createLinks() {
 	catch (exception) {
 		matches = {};
 	}
-	
+	let count = 0;
 	if (matches.length > 1) {
 		let set = new Set();
 		matches.forEach(async (match) => {
+			count += 1;
 			let user1 = match['user1'];
 			let user2 = match['user2'];
 			if (!set.has([user1, user2].toString()) && !set.has([user2, user1].toString())) {
@@ -88,16 +89,16 @@ async function createLinks() {
 					})
 				}
 			})
-			await prelinks.deleteOne( { _id: res['_id'] } ).catch((error) => {
+			await prelinks.deleteOne( { _id: match['_id'] } ).catch((error) => {
 				console.log(error);
 			}).catch((error)=>{
 				console.log(error)
 			})
 		});
 	}
+	return count;
 }
 
 setTimeout(async function timer() {
 	await createLinks();
-	setTimeout(timer, delay);
 }, delay);
