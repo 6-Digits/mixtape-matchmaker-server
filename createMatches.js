@@ -8,7 +8,7 @@ const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node'); // CPU computation
 const use = require('@tensorflow-models/universal-sentence-encoder');
 
-const delay = 120000;
+const delay = 2 * 60000;
 
 async function createMatches() {
 	try {
@@ -26,29 +26,9 @@ async function createMatches() {
 		let userEmbeddings = []
 		await use.load().then(async (model) => {
 			for (const user of users) {				
-				let scores = [];
 				const genres = user['genres'];
 				const uid = user['id']
-				
-				// if (genres.length === 0) {
-				// 	continue;
-				// }
-				
-				// for (const genre of genres) {
-				// 	if (genre.length > 0) {
-				// 		const embeddings = await model.embed(genre);
-				// 		const score = tf.mean(embeddings, 0);
-				// 		scores.push(score);
-				// 	}
-				// }
-				
-				// if (scores.length === 0) {
-				// 	continue;
-				// }
-				
-				// scores = tf.stack(scores);
-				// const embedding = tf.mean(scores, 0);
-				const embedding = genres.length;
+				const embedding = [genres.length];
 				
 				const profile = await profiles.findById(uid);
 				const preference = await preferences.findById(uid);
@@ -122,4 +102,4 @@ async function createMatches() {
 setTimeout(async function timer() {
 	await createMatches();
 	setTimeout(timer, delay);
-}, 0);
+}, delay);
