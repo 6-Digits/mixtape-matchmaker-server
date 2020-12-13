@@ -7,7 +7,7 @@ const PORT = process.env.CHAT_PORT;
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage";
 
 io.on("connection", (socket) => {
-	console.log(`Client ${socket.id} connected`);
+	//console.log(`Client ${socket.id} connected`);
 
 	// Join a conversation
 	const { roomId } = socket.handshake.query;
@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
 				{$push: {messages : messageDB._id}}, 
 				{new : true}
 			).then((result)=>{
-				console.log("Success in adding messageID to chat message array")
+				//console.log("Success in adding messageID to chat message array")
 			}).catch((error)=>{
 				console.log(error);
 			})
@@ -39,7 +39,7 @@ io.on("connection", (socket) => {
 
 	// Leave the room if the user closes the socket
 	socket.on("disconnect", () => {
-		console.log(`Client ${socket.id} disconnected`);
+		//console.log(`Client ${socket.id} disconnected`);
 		socket.leave(roomId);
 	});
 });

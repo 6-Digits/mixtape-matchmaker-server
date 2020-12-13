@@ -47,10 +47,10 @@ router.get('/logout', async (req, res) => {
 });
 // http://localhost:42069/api/auth/register
 router.post('/register', async (req, res) => {
-    console.log("registering users");
+    //console.log("registering user");
     let hashedPassword = bcrypt.hashSync(req.body.password, 8);
     let token = null;
-    console.log("Creating account.")
+    //console.log("Creating account.")
     await accounts.create({
         email: req.body.email,
         password: hashedPassword
@@ -62,7 +62,7 @@ router.post('/register', async (req, res) => {
         });
         let name = `${req.body.firstName} ${req.body.lastName}`;
         //console.log(req.body);
-        console.log("Creating profile.")
+        //console.log("Creating profile.")
         await mixtapes.create({
             owner: result._id,
             match: true
@@ -94,8 +94,8 @@ router.post('/register', async (req, res) => {
             console.log(error)
             return res.status(500).send("Error creating profile in database")
         });
-    }).catch((err) => {
-        console.log(err)
+    }).catch((error) => {
+        console.log(error)
         return res.status(500).send("There was a problem registering the user`.");
     })
 });
