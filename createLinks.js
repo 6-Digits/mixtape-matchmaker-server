@@ -54,6 +54,8 @@ async function createLinks() {
 					creationDate: Date.now()
 				}).catch((error) => {
 					console.log(error);
+					console.log(user1)
+					console.log(user2)
 				})
 				// Notification ping for user 1
 				let notification1 = {
