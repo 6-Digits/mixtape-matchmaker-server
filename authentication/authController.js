@@ -121,7 +121,7 @@ router.post('/resetPassword', async (req, res) => {
     if (req.body.email == '') {
         res.status(400).send('No email provided');
     }
-    let password = Math.random().toString(36).substring(8)
+    let password = Math.random().toString(36).substring(0, 8)
     let hashedPassword = bcrypt.hashSync(password, 8);
 
     await accounts.findOneAndUpdate({ email: req.body.email },
