@@ -404,7 +404,8 @@ router.post('/deleteMixtape/id/:id', verifyToken, async (req, res) => {
 router.post('/createComment/mid/:mid', /*verifyToken,*/ async (req, res) => {
 	await comments.create({
 		user: req.body.user,
-		text: req.body.text
+		text: req.body.text,
+		date: Date.now()
 	}).then(async (result) => {
 		if (!result) {
 			return res.status(404).send("There is a problem with creating the comment.");
