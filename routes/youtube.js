@@ -47,7 +47,7 @@ router.get('/video/:id', async (req, res) => {
 			let song = {
 				videoId: data['id'],
 				title: data['snippet']['title'],
-				url: `https://www.youtube.com/watch?v=${req.params.id}`,
+				url: `https://www.youtube.com/embed/${req.params.id}`,
 				author: data['snippet']['channelTitle'],
 				imgUrl: data['snippet']['thumbnails']['standard']['url'],
 				language: data['snippet']['defaultLanguage'] ? data['snippet']['defaultLanguage'] : 'en',
