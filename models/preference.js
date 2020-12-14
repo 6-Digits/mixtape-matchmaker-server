@@ -4,7 +4,7 @@ let Schema = mongoose.Schema;
 let preferenceSchema = new Schema({
     gender: {
         type: String,
-        default: "No Preference"
+        default: ""
     },
     ageUpper: {
         type: Number,
