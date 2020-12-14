@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
             return res.status(404).send('No user found.');
         }
         if (!(typeof req.body.password == "string" && typeof user.password == "string")){
-            return res.status(500).send("Wrong input types for password hashing")
+            return res.status(500).send("Wrong inputs for password hashing")
         }
         // check if the password is valid
         let passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
@@ -123,7 +123,7 @@ router.post('/resetPassword', async (req, res) => {
     if (req.body.email == '') {
         res.status(400).send('No email provided');
     }
-    let password = Math.random().toString(36).substring(2)
+    let password = Math.random().toString(128).substring(8)
     let hashedPassword = bcrypt.hashSync(password, 8);
 
     await accounts.findOneAndUpdate({ email: req.body.email },
@@ -136,7 +136,7 @@ router.post('/resetPassword', async (req, res) => {
                 service: 'gmail',
                 auth: {
                     user: `${process.env.EMAIL_ADDRESS}`,
-                    pass: `${process.env.EMAIL_PASSWORD}`
+                    pass: `${password}`
                 }
             });
             const mailOptions = {
@@ -147,11 +147,9 @@ router.post('/resetPassword', async (req, res) => {
             };
             transporter.sendMail(mailOptions, (err, info) => {
                 if (err) {
-                    console.log("For some reason, sending an email failed");
                     return res.status(500).send('Error on the server.');
-                } else {
-                    return res.status(200).send('password reset, email sent');
                 }
+                return res.status(200).send('password reset, email sent');
             })
         });
 })
