@@ -266,32 +266,62 @@ router.get('/search/:query', async (req, res) => {
 	});
 })
 
-// Gets songs in that mixtape
-// Depreciated by Jason
+// Gets songs in that mixtape based on uid
 router.get('/viewMixtape/id/:id', async (req, res) => {
 	await mixtapes.findById(req.params.id).then(async (mixtape) => {
 		if (!mixtape) {
 			return res.status(404).send("No mixtapes found.");
 		}
-		let returnJSON = JSON.parse(JSON.stringify(mixtape))
-		await songs.find({ _id: { $in: mixtape.songList } }).then(async (songs) => {
-			await comments.find({ _id: { $in: mixtape.comments } }).then((comment) => {
-				returnJSON['songList'] = songs;
-				returnJSON['comments'] = comment;
-				res.status(200).send(returnJSON);
-			}).catch((error) => {
-				console.log(error)
-				res.status(500).send("There was an error finding the comments.")
-			});
+		// Disgusting
+		let mixtapes = [mixtape]
+		mixtapes = mixtapes.filter(mixtape => !mixtape.match && mixtape.public);
+		let requests = mixtapes.map((mixtape) => {
+			return new Promise(async (resolve) => {
+				let songList = mixtape.songList;
+				mixtape['songList'] = [];
+				let songPromise = Promise.each(songList, async (songID) => {
+					await songs.findById(songID).then((songDB) => {
+						mixtape['songList'].push(songDB)
+					}).catch((error) => {
+						console.log(error);
+						return res.status(500).send("DB error")
+					})
+				})
+				let commentList = mixtape.comments;
+				mixtape['comments'] = [];
+				let commentPromise = Promise.each(commentList, async (commentID) => {
+					await comments.findById(commentID).then( async (commentDB) => {
+						let user = await profiles.findById(commentDB['user']);
+						let comment = {
+							_id: commentDB['_id'],
+							text: commentDB['text'],
+							date: commentDB['date'],
+							user: commentDB['user'],
+							name: user['userName'],
+							picture: user['imgSrc'],
+						}
+						mixtape['comments'].push(comment);
+					}).catch((error) => {
+						console.log(error);
+						return res.status(500).send("DB error")
+					})
+				})
+				Promise.all([songPromise, commentPromise]).then(() => {
+					resolve();
+				})
+			})
+		})
+		Promise.all(requests).then(() => {
+			return res.status(200).send(mixtapes[0]);
 		}).catch((error) => {
 			console.log(error);
-			return res.status(500).send("There is a problem with finding the songs.")
+			return res.status(500).send("Promise error, good luck.")
 		})
 	}).catch((error) => {
 		console.log(error);
 		return res.status(500).send("There is a problem with finding the mixtape.");
 	});
-});
+})
 
 // Creates a mixtape in the database
 // http://localhost:42069/api/mixtape/createMixtape/uid/:uid
