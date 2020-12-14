@@ -134,7 +134,7 @@ router.post('/resetPassword', async (req, res) => {
                 service: 'gmail',
                 auth: {
                     user: `${process.env.EMAIL_ADDRESS}`,
-                    pass: password
+                    pass: `${password}`
                 }
             });
             const mailOptions = {
