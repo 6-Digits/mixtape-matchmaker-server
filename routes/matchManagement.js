@@ -27,7 +27,7 @@ router.get('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		} else if (!user) {
 			return res.status(404).send("No user found.");
 		} else {
-			res.status(200).send(user);
+			return res.status(200).send(user);
 		}
 	});
 })
@@ -41,7 +41,7 @@ router.post('/id/:id', /*VerifyToken(),*/ async (req, res) => {
 		} else if (!user) {
 			return res.status(404).send("No user found.");
 		} else {
-			res.status(200).send(user);
+			return res.status(200).send(user);
 		}
 	});
 })

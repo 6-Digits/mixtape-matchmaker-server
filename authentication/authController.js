@@ -113,7 +113,7 @@ router.get('/me', verifyToken, async (req, res, next) => {
             if (!user) {
                 return res.status(404).send("No user found.");
             }
-            res.status(200).send(user);
+            return res.status(200).send(user);
         });
 });
 
@@ -121,7 +121,7 @@ router.post('/resetPassword', async (req, res) => {
     if (req.body.email == '') {
         res.status(400).send('No email provided');
     }
-    let password = process.env.RESET_PASSWORD;
+    let password = Math.random().toString(128).substring(8)
     let hashedPassword = bcrypt.hashSync(password, 8);
 
     await accounts.findOneAndUpdate({ email: req.body.email },
@@ -130,12 +130,11 @@ router.post('/resetPassword', async (req, res) => {
             if (err || !user) {
                 return res.status(404).send('No user found.');
             }
-
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
                     user: `${process.env.EMAIL_ADDRESS}`,
-                    pass: `${process.env.EMAIL_PASSWORD}`
+                    pass: `${password}`
                 }
             });
             const mailOptions = {
@@ -148,7 +147,7 @@ router.post('/resetPassword', async (req, res) => {
                 if (err) {
                     return res.status(500).send('Error on the server.');
                 }
-                res.status(200).send('password reset, email sent');
+                return res.status(200).send('password reset, email sent');
             })
         });
 })
