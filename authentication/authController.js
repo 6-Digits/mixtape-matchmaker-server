@@ -25,7 +25,9 @@ router.post('/login', async (req, res) => {
         } else if (!user) {
             return res.status(404).send('No user found.');
         }
-
+        if (!(typeof req.body.password == "string" && typeof user.password == "string")){
+            return res.status(500).send("Wrong input types for password hashing")
+        }
         // check if the password is valid
         let passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
         if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
