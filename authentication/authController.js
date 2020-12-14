@@ -37,8 +37,11 @@ router.post('/login', async (req, res) => {
         });
 
         // return the information including token as JSON
-        res.status(200).send({ auth: true, token: token, id: user._id });
-    });
+        return res.status(200).send({ auth: true, token: token, id: user._id });
+    }).catch((error)=>{
+        console.log(error)
+        return res.status(404).send("No user found or password is incorrect")
+    })
 
 });
 // http://localhost:42069/api/auth/logout
