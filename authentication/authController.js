@@ -1,4 +1,5 @@
 require('dotenv').config()
+import { v4 as uuidv4 } from 'uuid';
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -123,7 +124,7 @@ router.post('/resetPassword', async (req, res) => {
     if (req.body.email == '') {
         res.status(400).send('No email provided');
     }
-    let password = Math.random().toString(128).substring(8)
+    let password = uuidv4().stringify().substring(8)
     let hashedPassword = bcrypt.hashSync(password, 8);
 
     await accounts.findOneAndUpdate({ email: req.body.email },
