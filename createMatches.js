@@ -28,6 +28,11 @@ async function createMatches() {
 			for (const user of users) {
 				const genres = user['genres'];
 				const uid = user['id']
+				
+				if (genres.length === 0) {
+					continue;
+				}
+				
 				const embedding = [genres.length];
 				
 				const profile = await profiles.findById(uid);
@@ -55,6 +60,9 @@ async function createMatches() {
 			if (match['matches'].length === 0) {
 				const current = await userEmbeddings.find(e => e['_id'] == match['_id']);
 				if (current == undefined || current == null) {
+					continue;
+				}
+				if (current['genderPref'] == undefined || current['genderPref'] == null || current['genderPref'] == "") {
 					continue;
 				}
 				
