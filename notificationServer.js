@@ -18,14 +18,14 @@ io.on("connection", (socket) => {
 		//console.log(roomId)
 		//console.log(data)
 		let notification = {
-			user: data.reciever,
+			user: data.receiver,
 			message: data.message,
 			time: Date.now(),
 		}
-		await accounts.findById(data.reciever).then(async(accountDB)=>{
+		await accounts.findById(data.receiver).then(async(accountDB)=>{
 			if (accountDB.allowNotifications){
-				// This is where the server emits back the message to a reciever
-				io.in(data.reciever).emit(NEW_NOTIFICATION_EVENT, notification);
+				// This is where the server emits back the message to a receiver
+				io.in(data.receiver).emit(NEW_NOTIFICATION_EVENT, notification);
 				notifications.create(notification).then((result)=>{
 					console.log("Success in creating a notification in DB")
 				}).catch((error)=>{

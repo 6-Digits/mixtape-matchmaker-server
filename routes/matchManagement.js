@@ -187,10 +187,10 @@ router.post('/removeMatch', async (req, res) => {
 		}
 		await messages.deleteMany({_id : {$in : deletedChat.messages}}).then(async (result)=>{
 			// Is the code below really neccessary for overall functionality?
-			let string1 = `profileDislikes.${req.body.reciever}`;
+			let string1 = `profileDislikes.${req.body.receiver}`;
 			let param1 = {};
 			param1[string1] = Date.now();
-			let string2 = `profileLikes.${req.body.reciever}`;
+			let string2 = `profileLikes.${req.body.receiver}`;
 			let param2 = {};
 			param2[string2] = Date.now();
 			await profiles.findByIdAndUpdate(req.body.user, { $set: param1, $unset: param2}).then(async (profileDB) => {
@@ -289,15 +289,15 @@ router.get('/compatible/uid/:uid', async (req, res) => {
 })
 
 router.post('/like', async (req, res) => {
-	let string1 = `profileLikes.${req.body.reciever}`;
+	let string1 = `profileLikes.${req.body.receiver}`;
 	let param1 = {};
 	param1[string1] = Date.now();
-	let string2 = `profileDislikes.${req.body.reciever}`;
+	let string2 = `profileDislikes.${req.body.receiver}`;
 	let param2 = {};
 	param2[string2] = Date.now();
 	await profiles.findByIdAndUpdate(req.body.user, {$set: param1, $unset: param2}).then(async (profileDB) => {
-		await prelinks.create({ user: req.body.reciever, liker: req.body.user}).then(async (prelink)=>{
-			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.reciever}}).then(async (matchDB)=>{
+		await prelinks.create({ user: req.body.receiver, liker: req.body.user}).then(async (prelink)=>{
+			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.receiver}}).then(async (matchDB)=>{
 				return res.status(200).send(matchDB)
 			}).catch((error)=>{
 				console.log(error)
@@ -313,16 +313,16 @@ router.post('/like', async (req, res) => {
 	})
 })
 router.post('/dislike', async (req, res) => {
-	let string1 = `profileDislikes.${req.body.reciever}`;
+	let string1 = `profileDislikes.${req.body.receiver}`;
 	let param1 = {};
 	param1[string1] = Date.now();
-	let string2 = `profileLikes.${req.body.reciever}`;
+	let string2 = `profileLikes.${req.body.receiver}`;
 	let param2 = {};
 	param2[string2] = Date.now();
 	await profiles.findByIdAndUpdate(req.body.user, { $set: param1, $unset: param2}).then(async (profileDB) => {
 		// There may not be any prelink to delete, so prelinkDB might be empty but we never use it anyway
-		await prelinks.findOneAndDelete({user: req.body.reciever, liker: req.body.user}).then(async (prelink)=>{
-			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.reciever}}).then(async (matchDB)=>{
+		await prelinks.findOneAndDelete({user: req.body.receiver, liker: req.body.user}).then(async (prelink)=>{
+			await matches.findByIdAndUpdate(req.body.user, {$pull: {matches : req.body.receiver}}).then(async (matchDB)=>{
 				return res.status(200).send(matchDB)
 			}).catch((error)=>{
 				console.log(error)

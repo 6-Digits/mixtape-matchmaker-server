@@ -65,7 +65,7 @@ async function createLinks() {
 				}
 				await accounts.findById(user1).then(async (accountDB) => {
 					if (accountDB.allowNotifications) {
-						// This is where the server emits back the message to a reciever
+						// This is where the server emits back the message to a receiver
 						io.in(user1).emit(NEW_NOTIFICATION_EVENT, notification1);
 						notifications.create(notification1).then((result) => {
 							console.log("Success in creating a notification in DB")
@@ -82,7 +82,7 @@ async function createLinks() {
 				}
 				await accounts.findById(user2).then(async (accountDB) => {
 					if (accountDB.allowNotifications) {
-						// This is where the server emits back the message to a reciever
+						// This is where the server emits back the message to a receiver
 						io.in(user2).emit(NEW_NOTIFICATION_EVENT, notification2);
 						notifications.create(notification2).then((result) => {
 							console.log("Success in creating a notification in DB")
