@@ -110,5 +110,6 @@ async function createMatches() {
 
 setTimeout(async function timer() {
 	await createMatches();
+	console.log("Matches created")
 	setTimeout(timer, delay);
 }, delay);

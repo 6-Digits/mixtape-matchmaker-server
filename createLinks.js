@@ -102,5 +102,6 @@ async function createLinks() {
 
 setTimeout(async function timer() {
 	await createLinks();
+	console.log("Chats created")
 	setTimeout(timer, delay);
 }, delay);
