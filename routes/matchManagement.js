@@ -229,11 +229,20 @@ router.post('/preference/uid/:uid', /*VerifyToken(),*/ async (req, res) => {
 	if (req.body.ageLower < 18) {
 		return res.status(500).send("FBI OPEN UP!!!")
 	}
-	await preferences.findByIdAndUpdate(req.params.uid, req.body, { new: true }).then((preferenceDB) => {
+	await preferences.findByIdAndUpdate(req.params.uid, req.body, { new: true }).then(async (preferenceDB) => {
 		if (!preferenceDB) {
 			return res.status(404).send("No preference for this user found.")
 		}
-		return res.status(200).send(preferenceDB)
+		await matches.findByIdAndUpdate(req.params.uid, {matches : []}, {new : true}).then((matchDB)=>{
+			if (!matchDB){
+				return res.status(404).send("No match doc for this user found.")
+			}else{
+				return res.status(200).send(preferenceDB)
+			}
+		}).catch((error)=>{
+			console.log(error)
+			return res.status(500).send("Error in updating the match document.")
+		})
 	}).catch((error) => {
 		console.log(error)
 		return res.status(500).send("Error in updating the preferences.")
