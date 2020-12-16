@@ -158,6 +158,7 @@ router.get('/liked/uid/:uid', async (req, res) => {
 			})
 		})
 		Promise.all(requests).then((mixtapeList) => {
+			mixtapeList = mixtapeList.filter(mixtape => mixtape);
 			let requests = mixtapeList.map((mixtape) => {
 				return new Promise(async (resolve) => {
 					let songList = mixtape.songList;
