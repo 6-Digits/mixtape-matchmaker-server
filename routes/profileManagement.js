@@ -84,7 +84,7 @@ router.post('/uid/:id', async (req, res) => {
 					allowNotifications: req.body.allowNotifications
 				}
 				// Checks if the password needs to be updated
-				if (req.body.newPassword !== null){
+				if (req.body.newPassword !== null || req.body.newPassword.length > 0){
 					account['password'] = bcrypt.hashSync(req.body.newPassword, 8);
 				}
 				Promise.all([
