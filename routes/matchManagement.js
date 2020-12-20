@@ -14,7 +14,7 @@ const songs = require('../models/song');
 const prelinks = require('../models/prelink')
 const links = require('../models/link')
 const matches = require('../models/match')
-const VerifyToken = require('../authentication/verifyToken');
+const VerifyToken = require('./verifyToken');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 

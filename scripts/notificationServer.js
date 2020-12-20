@@ -1,14 +1,14 @@
 require('dotenv').config();
 const server = require("http").createServer();
 const io = require("socket.io")(server);
-const notifications = require('./models/notification')
-const accounts = require('./models/account')
+
+const notifications = require('../models/notification')
+const accounts = require('../models/account')
+
 const PORT = process.env.NOTIFICATION_PORT;
 const NEW_NOTIFICATION_EVENT = "newNotificationEvent";
 
 io.on("connection", (socket) => {
-	//console.log(`Client ${socket.id} connected`);
-
 	// Join a conversation
 	const { roomId } = socket.handshake.query;
 	socket.join(roomId);

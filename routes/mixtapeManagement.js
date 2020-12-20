@@ -9,7 +9,7 @@ const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
 const comments = require('../models/comment');
 const profiles = require('../models/profile.js');
-const verifyToken = require('../authentication/verifyToken');
+const verifyToken = require('./verifyToken');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 

@@ -1,14 +1,14 @@
 require('dotenv').config();
 const server = require("http").createServer();
 const io = require("socket.io")(server);
-const messages = require('./models/message');
-const chats = require('./models/chat');
+
+const messages = require('../models/message');
+const chats = require('../models/chat');
+
 const PORT = process.env.CHAT_PORT;
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage";
 
 io.on("connection", (socket) => {
-	//console.log(`Client ${socket.id} connected`);
-
 	// Join a conversation
 	const { roomId } = socket.handshake.query;
 	socket.join(roomId);

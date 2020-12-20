@@ -1,10 +1,11 @@
 require('dotenv').config();
 const axios = require('axios');
-const profiles = require('./models/profile');
-const preferences = require('./models/preference');
-const matches = require('./models/match');
 
-const DELAY = 2 * 60000;
+const profiles = require('../models/profile');
+const preferences = require('../models/preference');
+const matches = require('../models/match');
+
+const DELAY = 5 * 60000;
 
 function euclideanDistance(x, y) {
 	if (x.length !== 2 && y.length !== 2) {
@@ -106,9 +107,9 @@ async function createMatches() {
 			}
 		}
 	}
-	catch (exception) {
+	catch (error) {
 		console.log('something broke in creating matches');
-		console.log(exception);
+		console.log(error);
 	}
 }
 
