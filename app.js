@@ -9,10 +9,10 @@ const app = express()
 	.use(express.urlencoded({ extended: true }));
 
 // background scripts
-require('./chatServer');
-require('./notificationServer');
-require('./createLinks');
-require('./createMatches');
+require('./scripts/chatServer');
+require('./scripts/notificationServer');
+require('./scripts/createLinks');
+require('./scripts/createMatches');
 
 // start server on port 42049
 const port = process.env.PORT;

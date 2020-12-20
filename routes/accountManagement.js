@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+
 const accounts = require('../models/account');
 const verifyToken = require('../authentication/verifyToken');
-const bcrypt = require('bcryptjs');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 

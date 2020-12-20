@@ -3,13 +3,13 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const accounts = require('../models/account');
+const Promise = require('bluebird');
+
 const mixtapes = require('../models/mixtape');
 const songs = require('../models/song');
 const comments = require('../models/comment');
 const profiles = require('../models/profile.js');
 const verifyToken = require('../authentication/verifyToken');
-const Promise = require('bluebird');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 

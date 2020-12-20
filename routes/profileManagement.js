@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
+
 const accounts = require('../models/account');
 const profiles = require('../models/profile');
 const notifications = require('../models/notification');
 const VerifyToken = require('../authentication/verifyToken');
-const bcrypt = require('bcryptjs');
+
 router.use(bodyParser.urlencoded({ extended: true }));
 
 // Gets a single user-preference JSON from the database
