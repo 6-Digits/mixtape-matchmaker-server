@@ -1,4 +1,3 @@
-require('dotenv').config();
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node'); // CPU computation
 const use = require('@tensorflow-models/universal-sentence-encoder');
@@ -8,9 +7,9 @@ const preferences = require('../models/preference');
 const matches = require('../models/match');
 const mixtapes = require('../models/mixtape');
 
-const DELAY = 5 * 60000;
+const NEW_NOTIFICATION_EVENT = "newNotificationEvent";
 
-async function createMatches() {
+async function createMatches(io) {
 	try {
 		let playlists = await mixtapes.find({ match: true });
 		
@@ -108,8 +107,4 @@ async function createMatches() {
 	}
 }
 
-setTimeout(async function timer() {
-	await createMatches();
-	console.log("Matches created")
-	setTimeout(timer, DELAY);
-}, DELAY);
+module.exports = createMatches;

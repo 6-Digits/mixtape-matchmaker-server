@@ -9,11 +9,29 @@ const app = express()
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }));
 
+const server = require('http').createServer(app);
+const io = require("socket.io").listen(server);
+
+const createSockets = require('./scripts/createSockets');
+const createChats = require('./scripts/createChats');
+const createMatches = require('./scripts/createMatches');
+
+createSockets(io);
+
 // background scripts
-require('./scripts/chatServer');
-require('./scripts/notificationServer');
-require('./scripts/createLinks');
-require('./scripts/createMatches');
+const CHAT_DELAY = 2 * 60000;
+setTimeout(async function timer() {
+	await createChats(io);
+	console.log("Chats created")
+	setTimeout(timer, CHAT_DELAY);
+}, CHAT_DELAY);
+
+const MATCH_DELAY = 5 * 60000;
+setTimeout(async function timer() {
+	await createMatches(io);
+	console.log("Matches created")
+	setTimeout(timer, MATCH_DELAY);
+}, MATCH_DELAY);
 
 // routes
 app.use("/", require("./routes/index"));
@@ -33,10 +51,8 @@ mongoose.connect(mongoUri, {
 	console.log("Connected to the MongoDB database");
 });
 
-// start server on port 42049
-const port = process.env.PORT;
-app.listen(port, () => {
-	console.log(`Server running at port: ${port}`);
+server.listen(process.env.PORT, () => {
+	console.log(`Server started on port ${process.env.PORT}`);
 });
 
 module.exports = app;

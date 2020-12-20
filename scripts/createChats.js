@@ -1,15 +1,11 @@
-require('dotenv').config()
-const io = require('./notificationServer').io;
-
 const prelinks = require('../models/prelink');
 const chats = require('../models/chat')
 const notifications = require('../models/notification')
 const accounts = require('../models/account')
 
 const NEW_NOTIFICATION_EVENT = "newNotificationEvent";
-const DELAY = 2 * 60000;
 
-async function createLinks() {
+async function createChats(io) {
 	let matches;
 	try {
 		matches = await prelinks.aggregate([
@@ -110,8 +106,4 @@ async function createLinks() {
 	}
 }
 
-setTimeout(async function timer() {
-	await createLinks();
-	console.log("Chats created")
-	setTimeout(timer, DELAY);
-}, DELAY);
+module.exports = createChats;
