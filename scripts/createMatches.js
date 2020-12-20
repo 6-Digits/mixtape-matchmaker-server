@@ -1,46 +1,41 @@
 require('dotenv').config();
-const axios = require('axios');
+const tf = require('@tensorflow/tfjs');
+require('@tensorflow/tfjs-node'); // CPU computation
+const use = require('@tensorflow-models/universal-sentence-encoder');
 
 const profiles = require('../models/profile');
 const preferences = require('../models/preference');
 const matches = require('../models/match');
+const mixtapes = require('../models/mixtape');
 
 const DELAY = 5 * 60000;
 
-function euclideanDistance(x, y) {
-	if (x.length !== 2 && y.length !== 2) {
-		return 0;
-	}
-	
-	const d1 = x[0] - y[0];
-	const d2 = x[1] - y[1];
-	return Math.sqrt(d1 * d1 + d2 * d2);
-}
-
 async function createMatches() {
 	try {
-		let request = await axios.get(`${process.env.SERVER_API}/match/mixtapes`);
-		let playlists = request.data;
-		let users = playlists.map(playlist => {
-			const genres = playlist['songList'].map(x => x['genre']);
+		let playlists = await mixtapes.find({ match: true });
+		
+		let users = playlists.filter(playlist => {
+			const songList = playlist['songList'];
+			if (songList) {
+				return songList.length > 0;
+			}
+		}).map(playlist => {
 			const user = {
 				id: playlist['owner'],
-				genres: genres
-			}
+				genres: playlist['songList']
+			};
 			return user;
 		});
 		
 		let userEmbeddings = []
 		for (const user of users) {
-			const genres = user['genres'];
 			const uid = user['id']
-			
+			const genres = user['genres'];
 			if (genres.length === 0) {
 				continue;
 			}
 			
 			const embedding = [genres.length];
-			
 			const profile = await profiles.findById(uid);
 			const preference = await preferences.findById(uid);
 			
@@ -86,8 +81,8 @@ async function createMatches() {
 						}
 					}
 					
-					let mixtapeScore = Math.abs(user['embedding'] - current['embedding']);
-					let locationScore = euclideanDistance(user['geocode'], current['geocode']);
+					let mixtapeScore = tf.metrics.cosineProximity(tf.tensor(user['embedding']), tf.tensor(current['embedding'])).arraySync();
+					let locationScore = tf.metrics.meanAbsoluteError(tf.tensor(user['geocode']), tf.tensor(current['geocode'])).arraySync();
 					if (locationScore < 0.0001) {
 						locationScore = 0.0001;
 					}

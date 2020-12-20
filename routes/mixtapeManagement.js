@@ -381,34 +381,7 @@ router.post('/addSong', async (req, res) => {
 		console.log(error);
 		return res.status(500).send("Error in finding song.");
 	})
-})
-
-// Creates song if not in database
-// Return song collection
-// http://localhost:42069/api/mixtape/createSong/:videoId
-router.post('/createSong/:videoId', async (req, res) => {
-	await songs.findOne({ videoId: req.params.videoId }).then(async (result) => {
-		if (result) {
-			return res.status(200).send(result);
-		} else {
-			let result = await axios.get(`${process.env.SERVER_API}/youtube/video/${req.params.videoId}`).catch((error => {
-				console.log(error);
-				return res.status(500).send("Error in YouTube query.");
-			}));
-			let song = result.data;
-			
-			await songs.create(song).then((result) => {
-				return res.status(200).send(result);
-			}).catch((error) => {
-				console.log(error);
-				return res.status(500).send("Error in creating song.")
-			})
-		}
-	}).catch((error) => {
-		console.log(error);
-		return res.status(500).send("Error in finding song.");
-	})
-})
+});
 
 // Deletes a mixtape in the database
 // http://localhost:42069/api/mixtape/deleteMixtape/id/:id
@@ -484,7 +457,7 @@ router.get('/likedIDs/uid/:uid', async (req, res) => {
 		console.log(error);
 		return res.status(500).send("Error in profile DB.")
 	});
-})
+});
 
 // When a user hearts a mixtape, that mixtape's heart amount is incremented by 1 
 // Furthermore, profile.mixtapeHearts is edited to reflect the like
@@ -525,7 +498,7 @@ router.post('/like', /*verifyToken,*/ async (req, res) => {
 		console.log(error)
 		return res.status(500).send("Error in profile DB.")
 	})
-})
+});
 
 // When a user hearts a mixtape, that mixtape's heart amount is incremented by 1 
 // Furthermore, profile.mixtapeHearts is edited to reflect the like
@@ -566,7 +539,7 @@ router.post('/unlike', /*verifyToken,*/ async (req, res) => {
 		console.log(error)
 		return res.status(500).send("Error in profile DB.")
 	})
-})
+});
 
 // http://localhost:42069/api/mixtape/view
 router.post('/view', async (req, res) => {
@@ -603,6 +576,6 @@ router.post('/view', async (req, res) => {
 		console.log(error);
 		return res.status(500).send("Error in finding profile.")
 	})
-})
+});
 
 module.exports = router;

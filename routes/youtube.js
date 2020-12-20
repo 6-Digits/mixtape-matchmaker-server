@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const youtube = require('scrape-youtube').default;
 
+const songs = require('../models/song');
+
 router.use(bodyParser.urlencoded({ extended: true }));
 
 function convertTime(duration) {
@@ -41,7 +43,7 @@ router.get('/video/:id', async (req, res) => {
 	const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${req.params.id}&key=${process.env.YOUTUBE_API_KEY}`;
 	
 	axios.get(url).then((response) => {
-		if (response.status == 200) {
+		if (response.status === 200) {
 			let data = response.data['items'][0];
 			
 			let song = {
@@ -49,7 +51,7 @@ router.get('/video/:id', async (req, res) => {
 				title: data['snippet']['title'],
 				url: `https://www.youtube.com/embed/${req.params.id}`,
 				author: data['snippet']['channelTitle'],
-				imgUrl: data['snippet']['thumbnails']['standard']['url'],
+				imgUrl: data['snippet']['thumbnails']['high']['url'],
 				language: data['snippet']['defaultLanguage'] ? data['snippet']['defaultLanguage'] : 'en',
 				genre: data['snippet']['tags'],
 				duration: convertTime(data['contentDetails']['duration']),
@@ -65,7 +67,7 @@ router.get('/video/:id', async (req, res) => {
 		console.log(error.message);
 		return res.status(500).send(error.message);
 	});
-})
+});
 
 // does not use any youtube api quota points
 router.get('/search/:query', async (req, res) => {
@@ -87,6 +89,58 @@ router.get('/search/:query', async (req, res) => {
 		console.log(error.message);
 		return res.status(500).send(error.message);
 	});
-})
+});
+
+// Creates song if not in database
+// Return song collection
+// http://localhost:42069/api/youtube/createSong/:videoId
+router.post('/createSong/:videoId', async (req, res) => {
+	await songs.findOne({ videoId: req.params.videoId }).then(async (result) => {
+		if (result) {
+			// song already in database, return it
+			return res.status(200).send(result);
+		} 
+		else {
+			// song not in database, query youtube
+			const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${req.params.videoId}&key=${process.env.YOUTUBE_API_KEY}`;
+			let response = await axios.get(url).catch((error => {
+				console.log(error.message);
+				return res.status(500).send(error.message);
+			}));
+			if (response.status === 200) {
+				// proper youtube id entered
+				let data = response.data['items'][0];
+				
+				// format song object
+				let song = {
+					videoId: data['id'],
+					title: data['snippet']['title'],
+					url: `https://www.youtube.com/embed/${req.params.id}`,
+					author: data['snippet']['channelTitle'],
+					imgUrl: data['snippet']['thumbnails']['high']['url'],
+					language: data['snippet']['defaultLanguage'] ? data['snippet']['defaultLanguage'] : 'en',
+					genre: data['snippet']['tags'],
+					duration: convertTime(data['contentDetails']['duration']),
+					apiType: "YouTube"
+				};
+				
+				// add song to database
+				await songs.create(song).then((result) => {
+					return res.status(200).send(result);
+				}).catch((error) => {
+					console.log(error);
+					return res.status(500).send("Error in creating song.")
+				});
+			}
+			else {
+				// invalid youtube id
+				return res.status(404).send("Invalid YouTube ID");
+			}
+		}
+	}).catch((error) => {
+		console.log(error);
+		return res.status(500).send("Error in finding song.");
+	})
+});
 
 module.exports = router;
