@@ -43,7 +43,7 @@ app.use('/search', require('./routes/search'));
 app.use('/youtube', require('./routes/youtube'));
 
 // initialize MongoDB
-const mongoUri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.vq24q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
+const mongoUri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.kqtqe.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
 mongoose.connect(mongoUri, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
