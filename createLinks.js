@@ -5,8 +5,9 @@ const links = require('./models/link');
 const notifications = require('./models/notification')
 const accounts = require('./models/account')
 const io = require('./notificationServer').io;
-const delay = 60000;
+
 const NEW_NOTIFICATION_EVENT = "newNotificationEvent";
+const DELAY = 60000;
 
 async function createLinks() {
 	let matches;
@@ -103,5 +104,5 @@ async function createLinks() {
 setTimeout(async function timer() {
 	await createLinks();
 	console.log("Chats created")
-	setTimeout(timer, delay);
-}, delay);
+	setTimeout(timer, DELAY);
+}, DELAY);
