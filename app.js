@@ -3,11 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-const app = express()
-	.use(cors())
-	.use(express.static(__dirname))
-	.use(express.json())
-	.use(express.urlencoded({ extended: true }));
+const app = express();
+app.use(cors());
+app.use(express.static(__dirname));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const server = require('http').createServer(app);
 const io = require("socket.io").listen(server);
@@ -16,9 +16,10 @@ const createSockets = require('./scripts/createSockets');
 const createChats = require('./scripts/createChats');
 const createMatches = require('./scripts/createMatches');
 
+// open sockets for chats and notifications
 createSockets(io);
 
-// background scripts
+// background script for chat creating
 const CHAT_DELAY = 2 * 60000;
 setTimeout(async function timer() {
 	await createChats(io);
@@ -26,6 +27,7 @@ setTimeout(async function timer() {
 	setTimeout(timer, CHAT_DELAY);
 }, CHAT_DELAY);
 
+// background script for matching algorithm
 const MATCH_DELAY = 5 * 60000;
 setTimeout(async function timer() {
 	await createMatches(io);
@@ -43,7 +45,11 @@ app.use('/search', require('./routes/search'));
 app.use('/youtube', require('./routes/youtube'));
 
 // initialize MongoDB
-const mongoUri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.kqtqe.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
+const db_username = process.env.DB_USERNAME;
+const db_password = process.env.DB_PASSWORD;
+const db_cluster = process.env.DB_CLUSTER;
+const db_name = process.env.DB_NAME;
+const mongoUri = `mongodb+srv://${db_username}:${db_password}@${db_cluster}/${db_name}?retryWrites=true&w=majority`
 mongoose.connect(mongoUri, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
@@ -51,8 +57,9 @@ mongoose.connect(mongoUri, {
 	console.log("Connected to the MongoDB database");
 });
 
-server.listen(process.env.PORT, () => {
-	console.log(`Server started on port ${process.env.PORT}`);
+const port = process.env.PORT
+server.listen(port, () => {
+	console.log(`Server started on port ${port}`);
 });
 
 module.exports = app;
